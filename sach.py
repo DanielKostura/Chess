@@ -42,44 +42,45 @@ def create_chess_array(board):
     for i in reversed(range(8)):
         row = []
         for j in reversed(range(8)):
-            current_piece = board.piece_at(chess.square(j, i))
+            current_piece = board.piece_at(chess.square(7-j, i))
+            print(current_piece)
             # empty squere
             current_piece = current_piece.symbol() if current_piece else ''
 
             # pawns
-            if current_piece == "P":
+            if current_piece == "p":
                 piece_symbol = "♟"
-            elif current_piece == "p":
+            elif current_piece == "P":
                 piece_symbol = "♙"
             
             # rooks
-            elif current_piece == "R":
-                piece_symbol = "♜"
             elif current_piece == "r":
+                piece_symbol = "♜"
+            elif current_piece == "R":
                 piece_symbol = "♖"
 
             # Nights
-            elif current_piece == "N":
-                piece_symbol = "♞"
             elif current_piece == "n":
+                piece_symbol = "♞"
+            elif current_piece == "N":
                 piece_symbol = "♘"
             
             # Bishops
-            elif current_piece == "B":
-                piece_symbol = "♝"
             elif current_piece == "b":
+                piece_symbol = "♝"
+            elif current_piece == "B":
                 piece_symbol = "♗"
             
             # Queen
-            elif current_piece == "Q":
-                piece_symbol = "♛"
             elif current_piece == "q":
+                piece_symbol = "♛"
+            elif current_piece == "Q":
                 piece_symbol = "♕"
 
             # Kings
-            elif current_piece == "K":
-                piece_symbol = "♚"
             elif current_piece == "k":
+                piece_symbol = "♚"
+            elif current_piece == "K":
                 piece_symbol = "♔"
             else:
                 piece_symbol = current_piece
@@ -90,13 +91,31 @@ def create_chess_array(board):
     
     return board_rows
 
+def on_click(action):
+        x = action.x
+        y = action.y
+
+        if 10 < x < 60*8 + 10 and 60 < y < 60*9:
+            rank = chr(ord('a') + (x - 10) // 60)
+            file = str(8 - (y - 60) // 60)
+            position = rank + file
+
+            print(position)
+
 
 # --------------------- button functions ---------------------
 def blitz_start():
     blitz_start.board = chess.Board()
+    blitz_start.board.push_san("e4")
+    print(blitz_start.board)
     draw_board(blitz.canvas, True, 0, 50, create_chess_array(blitz_start.board))
+
+    # button MENU
     b = Button(blitz.canvas, text="Menu", command=blitz_end, height=2, width=20)
     b.place(x=10, y=60*8+20+100-50)
+
+    # urcovanie suradnic
+    blitz.canvas.bind("<Button-1>", on_click)
 
 def blitz_end():
     blitz.window.destroy()
@@ -134,7 +153,7 @@ def blitz():
 
     # vykreslenie sachovnice
     draw_board(blitz.canvas, False, 0, 50)
-    
+
     # button START
     b = Button(blitz.canvas, text="START", command=blitz_start, height=2, width=20)
     b.place(x=10, y=H-50)
