@@ -1,6 +1,6 @@
 from tkinter import *
 import tkinter as tk
-import typing
+# import typing
 import chess
 # pip install chess
 # python -m pip install chess
@@ -9,8 +9,8 @@ def menu():
     menu.window = Tk()
     menu.window.title("Menu")
 
-    W = 1000
-    H = 80 * 8 + 20
+    W = 750
+    H = 60 * 8 + 20
     menu.canvas = Canvas(width=W, height=H,bg='white')
     menu.canvas.pack()
 
@@ -27,14 +27,14 @@ def draw_board(current_canvas: Tk, pieces: bool, bonus_x=0, bonus_y=0,
             else:
                 farba = "white"
 
-            x = column*80+10+bonus_x
-            y = row*80+10+bonus_y
-            current_canvas.create_rectangle(x, y, x+80, y+80,
+            x = column*60+10+bonus_x
+            y = row*60+10+bonus_y
+            current_canvas.create_rectangle(x, y, x+60, y+60,
                                             fill=farba ,outline='black',width='5')
     
             if pieces == True:
                 board = chess_board
-                current_canvas.create_text(x+40, y+40, text=board[row][column],
+                current_canvas.create_text(x+30, y+30, text=board[row][column],
                                            font=('Helvetica','50','bold'))
 
 def create_chess_array(board):
@@ -90,11 +90,13 @@ def create_chess_array(board):
     
     return board_rows
 
+
 # --------------------- button functions ---------------------
 def blitz_start():
-    draw_board(blitz.canvas, True, 0, 50, create_chess_array(chess.Board()))
+    blitz_start.board = chess.Board()
+    draw_board(blitz.canvas, True, 0, 50, create_chess_array(blitz_start.board))
     b = Button(blitz.canvas, text="Menu", command=blitz_end, height=2, width=20)
-    b.place(x=10, y=80*8+20+100-50)
+    b.place(x=10, y=60*8+20+100-50)
 
 def blitz_end():
     blitz.window.destroy()
@@ -113,23 +115,27 @@ def rapid_end():
 
 # ----------------------- menu buttons -----------------------
 def buttons():
-    Button(menu.canvas, text = "Blitz", command=blitz, height= 3, width=30).place(x = 80*9, y = 100)
-    Button(menu.canvas, text = "Rapid", command=rapid, height= 3, width=30).place(x = 80*9, y = 100+75)
-    Button(menu.canvas, text = "Precvičenie otvorení", command=openings, height= 3, width=30).place(x = 80*9, y = 100+75*2)
-    Button(menu.canvas, text = "Pravidlá", command=rules, height= 3, width=30).place(x = 80*9, y = 500)
+    Button(menu.canvas, text = "Blitz", command=blitz, height= 3, width=28).place(x = 60*8+2*20, y = 40)
+    Button(menu.canvas, text = "Rapid", command=rapid, height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
+    Button(menu.canvas, text = "Precvičenie otvorení", command=openings, height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
+    Button(menu.canvas, text = "Pravidlá", command=rules, height= 3, width=28).place(x = 60*8+2*20, y = 420)
 
 def blitz():
     menu.window.destroy()
 
-    blitz.window = tk.Tk()  # Vytvořte nové okno
+    # vytvorenie noveho okna
+    blitz.window = tk.Tk()
     blitz.window.title('Blitz')
 
-    W = 80 * 8 + 20
-    H = 80 * 8 + 20 + 100
+    W = 60 * 8 + 20
+    H = 60 * 8 + 20 + 100
     blitz.canvas = Canvas(width=W, height=H, bg='white')
     blitz.canvas.pack()
 
+    # vykreslenie sachovnice
     draw_board(blitz.canvas, False, 0, 50)
+    
+    # button START
     b = Button(blitz.canvas, text="START", command=blitz_start, height=2, width=20)
     b.place(x=10, y=H-50)
 
