@@ -23,7 +23,7 @@ def draw_board(current_canvas: Tk, pieces: bool, bonus_x=0, bonus_y=0,
     for row in range(8):
         for column in range(8):
             if (row + column) % 2 == 1:
-                farba = "green"
+                farba = "mediumseagreen"
             else:
                 farba = "white"
 
@@ -43,7 +43,6 @@ def create_chess_array(board):
         row = []
         for j in reversed(range(8)):
             current_piece = board.piece_at(chess.square(7-j, i))
-            print(current_piece)
             # empty squere
             current_piece = current_piece.symbol() if current_piece else ''
 
@@ -88,7 +87,6 @@ def create_chess_array(board):
             row.append(piece_symbol)
 
         board_rows.append(row)
-    
     return board_rows
 
 def on_click(action):
@@ -96,19 +94,40 @@ def on_click(action):
         y = action.y
 
         if 10 < x < 60*8 + 10 and 60 < y < 60*9:
-            rank = chr(ord('a') + (x - 10) // 60)
-            file = str(8 - (y - 60) // 60)
-            position = rank + file
+            file = chr(ord('a') + (x - 10) // 60)
+            rank = str(8 - (y - 60) // 60)
+            blitz.position += file + rank
+            blitz.position = blitz.position[2:]
+            try:
+                if chess.Move.from_uci(blitz.position) in blitz.board.legal_moves:
+                    blitz.board.push_san(blitz.position)
+                    draw_board(blitz.canvas, True, 0, 50,
+                               create_chess_array(blitz.board))
+            except:
+                pass
 
-            print(position)
-
+            if blitz.board.is_checkmate() == True:
+                blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                              fill="grey", outline="black")
+                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2,
+                                            text="ŠACH MAT",
+                                            font=('Helvetica','50','bold'))
+            elif blitz.board.is_stalemate() == True:
+                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2,
+                                            text="STALEMATE",
+                                            font=('Helvetica','50','bold'))
+            elif blitz.board.is_insufficient_material() == True:
+                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2,
+                                            text="NEDOSTATOK",
+                                            font=('Helvetica','50','bold'))
 
 # --------------------- button functions ---------------------
 def blitz_start():
-    blitz_start.board = chess.Board()
-    blitz_start.board.push_san("e4")
-    print(blitz_start.board)
-    draw_board(blitz.canvas, True, 0, 50, create_chess_array(blitz_start.board))
+    blitz.board = chess.Board()
+    draw_board(blitz.canvas, True, 0, 50, create_chess_array(blitz.board))
 
     # button MENU
     b = Button(blitz.canvas, text="Menu", command=blitz_end, height=2, width=20)
@@ -116,6 +135,7 @@ def blitz_start():
 
     # urcovanie suradnic
     blitz.canvas.bind("<Button-1>", on_click)
+    blitz.position = "...."
 
 def blitz_end():
     blitz.window.destroy()

@@ -1,11 +1,11 @@
 import chess
 
 board = chess.Board()
-print(board[0][0])
-#print(board.legal_moves)
+print(board.legal_moves)
+
 #<LegalMoveGenerator at ... (Nh3, Nf3, Nc3, Na3, h3, g3, f3, e3, d3, c3, ...)>
 
-#print(chess.Move.from_uci("a8a1") in board.legal_moves)
+print(chess.Move.from_uci("g1f3") in board.legal_moves)
 """
 chess.Move.from_uci("a8a1") in board.legal_moves
 #False
