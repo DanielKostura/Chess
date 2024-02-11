@@ -5,19 +5,6 @@ import chess
 # pip install chess
 # python -m pip install chess
 
-def menu():
-    menu.window = Tk()
-    menu.window.title("Menu")
-
-    W = 750
-    H = 60 * 8 + 20
-    menu.canvas = Canvas(width=W, height=H,bg='white')
-    menu.canvas.pack()
-
-    menu_buttons()
-    draw_board(menu.canvas, False)
-    menu.canvas.mainloop()
-
 def draw_board(current_canvas: Tk, pieces: bool, bonus_x=0, bonus_y=0,
                chess_board: list[list[str]]=[[""]]):
     for row in range(8):
@@ -96,129 +83,117 @@ def on_click(action):
         if 10 < x < 60*8 + 10 and 60 < y < 60*9:
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 60) // 60)
-            blitz.position += file + rank
-            blitz.position = blitz.position[2:]
+            game.position += file + rank
+            game.position = game.position[2:]
             try:
-                if chess.Move.from_uci(blitz.position) in blitz.board.legal_moves:
-                    blitz.board.push_san(blitz.position)
-                    draw_board(blitz.canvas, True, 0, 50,
-                               create_chess_array(blitz.board))
+                if chess.Move.from_uci(game.position) in game.board.legal_moves:
+                    game.board.push_san(game.position)
+                    draw_board(game.canvas, True, 0, 50,
+                               create_chess_array(game.board))
             except:
                 pass
 
-            if blitz.board.is_checkmate() == True:
-                blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+            if game.board.is_checkmate() == True:
+                game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
-                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                game.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2,
                                          text="ŠACH MAT",
                                          font=('Helvetica','50','bold'))  
-            elif blitz.board.is_stalemate() == True:
-                blitz.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
+            elif game.board.is_stalemate() == True:
+                game.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
                                               fill="grey", outline="black")
-                blitz.canvas.create_text((60 * 8 + 20)//2-5, 
+                game.canvas.create_text((60 * 8 + 20)//2-5, 
                                          (60 * 8 + 20 + 100)//2,
                                          text="REMÍZA",
                                          font=('Helvetica','50','bold'))
-                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                game.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2+40,
                                          text="Patová situácia",
                                          font=('Helvetica','15','bold'))
-            elif blitz.board.is_insufficient_material() == True:
-                blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+            elif game.board.is_insufficient_material() == True:
+                game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
-                blitz.canvas.create_text((60 * 8 + 20)//2-5, 
+                game.canvas.create_text((60 * 8 + 20)//2-5, 
                                          (60 * 8 + 20 + 100)//2,
                                          text="REMÍZA",
                                          font=('Helvetica','50','bold'))
-                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                game.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2+40,
                                          text="Nedostatok materiálu",
                                          font=('Helvetica','15','bold'))
-            elif blitz.board.can_claim_threefold_repetition() == True:
-                blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+            elif game.board.can_claim_threefold_repetition() == True:
+                game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
-                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                game.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2-5,
                                          text="REMÍZA",
                                          font=('Helvetica','50','bold'))
-                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                game.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2+40,
                                          text="Opakovanie ťahou",
                                          font=('Helvetica','15','bold'))
 
-# --------------------- button functions ---------------------
-def blitz_start():
-    blitz.board = chess.Board()
-    draw_board(blitz.canvas, True, 0, 50, create_chess_array(blitz.board))
 
-    # button MENU
-    b = Button(blitz.canvas, text="Menu", command=blitz_end, height=2, width=20)
-    b.place(x=10, y=60*8+20+100-50)
-
-    # urcovanie suradnic
-    blitz.canvas.bind("<Button-1>", on_click)
-    blitz.position = "...."
-
-def blitz_end():
-    blitz.window.destroy()
-    menu()
-
-def rapid_start():
-    draw_board(rapid.canvas, True, 0, 50)
-    b = Button(rapid.canvas, text="Menu", command=rapid_end, height=2, width=20)
-    b.place(x=10, y=80*8+20+100-50)
-
-def rapid_end():
-    rapid.window.destroy()
-    menu()
-# --------------------- button functions ---------------------
-
-
-# ----------------------- menu buttons -----------------------
-def menu_buttons():
-    Button(menu.canvas, text = "Hra s priaťelom", command=blitz, height= 3, width=28).place(x = 60*8+2*20, y = 40)
-    Button(menu.canvas, text = "Rapid", command=rapid, height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
-    Button(menu.canvas, text = "Precvičenie otvorení", command=openings, height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
-    Button(menu.canvas, text = "Pravidlá", command=rules, height= 3, width=28).place(x = 60*8+2*20, y = 420)
-
-def blitz():
+# --------------------- game functions ---------------------
+def game():
     menu.window.destroy()
 
     # vytvorenie noveho okna
-    blitz.window = tk.Tk()
-    blitz.window.title('Blitz')
+    game.window = tk.Tk()
+    game.window.title('Hra s priteľom')
 
     W = 60 * 8 + 20
     H = 60 * 8 + 20 + 100
-    blitz.canvas = Canvas(width=W, height=H, bg='white')
-    blitz.canvas.pack()
+    game.canvas = Canvas(width=W, height=H, bg='white')
+    game.canvas.pack()
 
     # vykreslenie sachovnice
-    draw_board(blitz.canvas, False, 0, 50)
+    draw_board(game.canvas, False, 0, 50)
 
     # button START
-    b = Button(blitz.canvas, text="START", command=blitz_start, height=2, width=20)
+    b = Button(game.canvas, text="START", command=game_start, height=2, width=20)
     b.place(x=10, y=H-50)
 
-    blitz.canvas.mainloop()
-    
-def rapid():
-    menu.window.destroy()
+    game.canvas.mainloop()
 
-    rapid.window = tk.Tk()  # Vytvořte nové okno
-    rapid.window.title('Blitz')
+def game_start():
+    game.board = chess.Board()
+    draw_board(game.canvas, True, 0, 50, create_chess_array(game.board))
 
-    W = 80 * 8 + 20
-    H = 80 * 8 + 20 + 100
-    rapid.canvas = Canvas(width=W, height=H, bg='white')
-    rapid.canvas.pack()
+    # button MENU
+    b = Button(game.canvas, text="Menu", command=game_end, height=2, width=20)
+    b.place(x=10, y=60*8+20+100-50)
 
-    draw_board(rapid.canvas, False, 0, 50)
-    b = Button(rapid.canvas, text="START", command=rapid_start, height=2, width=20)
-    b.place(x=10, y=H-50)
+    # urcovanie suradnic
+    game.canvas.bind("<Button-1>", on_click)
+    game.position = "...."
 
-    rapid.canvas.mainloop()
+def game_end():
+    game.window.destroy()
+    menu()
+# --------------------- game functions ---------------------
+
+
+def menu():
+    menu.window = Tk()
+    menu.window.title("Menu")
+
+    W = 750
+    H = 60 * 8 + 20
+    menu.canvas = Canvas(width=W, height=H,bg='white')
+    menu.canvas.pack()
+
+    menu_buttons()
+    draw_board(menu.canvas, False)
+    menu.canvas.mainloop()
+
+# ----------------------- menu buttons -----------------------
+def menu_buttons():
+    Button(menu.canvas, text = "Hra s priaťelom", command=game_menu, height= 3, width=28).place(x = 60*8+2*20, y = 40)
+    Button(menu.canvas, text = "Precvičenie otvorení", command=openings, height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
+    # Button(menu.canvas, text = "Rapid", command=rapid, height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
+    Button(menu.canvas, text = "Pravidlá", command=rules, height= 3, width=28).place(x = 60*8+2*20, y = 420)
 
 def openings():
     menu.window.destroy()
@@ -242,5 +217,8 @@ def rules():
 
     p.create_text(W//2, 30, text = "DDD", fill="black")
 # ----------------------- menu buttons -----------------------
+
+def game_menu():
+    game()
 
 menu()
