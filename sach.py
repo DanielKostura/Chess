@@ -14,7 +14,7 @@ def menu():
     menu.canvas = Canvas(width=W, height=H,bg='white')
     menu.canvas.pack()
 
-    buttons()
+    menu_buttons()
     draw_board(menu.canvas, False)
     menu.canvas.mainloop()
 
@@ -23,7 +23,7 @@ def draw_board(current_canvas: Tk, pieces: bool, bonus_x=0, bonus_y=0,
     for row in range(8):
         for column in range(8):
             if (row + column) % 2 == 1:
-                farba = "mediumseagreen"
+                farba = "green"
             else:
                 farba = "white"
 
@@ -108,21 +108,44 @@ def on_click(action):
 
             if blitz.board.is_checkmate() == True:
                 blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
-                                              fill="grey", outline="black")
+                                              fill="lightgrey", outline="black")
                 blitz.canvas.create_text((60 * 8 + 20)//2, 
-                                            (60 * 8 + 20 + 100)//2,
-                                            text="ŠACH MAT",
-                                            font=('Helvetica','50','bold'))
+                                         (60 * 8 + 20 + 100)//2,
+                                         text="ŠACH MAT",
+                                         font=('Helvetica','50','bold'))  
             elif blitz.board.is_stalemate() == True:
+                blitz.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
+                                              fill="grey", outline="black")
+                blitz.canvas.create_text((60 * 8 + 20)//2-5, 
+                                         (60 * 8 + 20 + 100)//2,
+                                         text="REMÍZA",
+                                         font=('Helvetica','50','bold'))
                 blitz.canvas.create_text((60 * 8 + 20)//2, 
-                                            (60 * 8 + 20 + 100)//2,
-                                            text="STALEMATE",
-                                            font=('Helvetica','50','bold'))
+                                         (60 * 8 + 20 + 100)//2+40,
+                                         text="Patová situácia",
+                                         font=('Helvetica','15','bold'))
             elif blitz.board.is_insufficient_material() == True:
+                blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                              fill="lightgrey", outline="black")
+                blitz.canvas.create_text((60 * 8 + 20)//2-5, 
+                                         (60 * 8 + 20 + 100)//2,
+                                         text="REMÍZA",
+                                         font=('Helvetica','50','bold'))
                 blitz.canvas.create_text((60 * 8 + 20)//2, 
-                                            (60 * 8 + 20 + 100)//2,
-                                            text="NEDOSTATOK",
-                                            font=('Helvetica','50','bold'))
+                                         (60 * 8 + 20 + 100)//2+40,
+                                         text="Nedostatok materiálu",
+                                         font=('Helvetica','15','bold'))
+            elif blitz.board.can_claim_threefold_repetition() == True:
+                blitz.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                              fill="lightgrey", outline="black")
+                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                                         (60 * 8 + 20 + 100)//2-5,
+                                         text="REMÍZA",
+                                         font=('Helvetica','50','bold'))
+                blitz.canvas.create_text((60 * 8 + 20)//2, 
+                                         (60 * 8 + 20 + 100)//2+40,
+                                         text="Opakovanie ťahou",
+                                         font=('Helvetica','15','bold'))
 
 # --------------------- button functions ---------------------
 def blitz_start():
@@ -153,8 +176,8 @@ def rapid_end():
 
 
 # ----------------------- menu buttons -----------------------
-def buttons():
-    Button(menu.canvas, text = "Blitz", command=blitz, height= 3, width=28).place(x = 60*8+2*20, y = 40)
+def menu_buttons():
+    Button(menu.canvas, text = "Hra s priaťelom", command=blitz, height= 3, width=28).place(x = 60*8+2*20, y = 40)
     Button(menu.canvas, text = "Rapid", command=rapid, height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
     Button(menu.canvas, text = "Precvičenie otvorení", command=openings, height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
     Button(menu.canvas, text = "Pravidlá", command=rules, height= 3, width=28).place(x = 60*8+2*20, y = 420)
