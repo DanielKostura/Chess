@@ -214,7 +214,7 @@ class Game:
 
     def game_start(self):
         draw_board(self.canvas, True, 0, 50, create_chess_array(Game.board))
-        
+
         # button MENU
         Button(self.canvas, text="Menu", command=self.game_end,
                height=2, width=20).place(x=10, y=60*8+20+100-50)
@@ -225,7 +225,6 @@ class Game:
     def on_click(self, action):
         piece_move(action.x, action.y, Game)
         draw_board(self.canvas, True, 0, 50, create_chess_array(Game.board))
-
 
     def game_end(self):
         self.window.destroy()
