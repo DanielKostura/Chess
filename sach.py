@@ -76,149 +76,160 @@ def create_chess_array(board):
         board_rows.append(row)
     return board_rows
 
-def on_click(action):
-        x = action.x
-        y = action.y
-
+def piece_move(x, y, fun):
         if 10 < x < 60*8 + 10 and 60 < y < 60*9:
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 60) // 60)
-            game.position += file + rank
-            game.position = game.position[2:]
+
+            print(Game.board)
+            fun.position += file + rank
+            fun.position = fun.position[2:]
+
             try:
-                if chess.Move.from_uci(game.position) in game.board.legal_moves:
-                    game.board.push_san(game.position)
-                    draw_board(game.canvas, True, 0, 50,
-                               create_chess_array(game.board))
+                if chess.Move.from_uci(fun.position) in fun.board.legal_moves:
+                    fun.board.push_san(fun.position)
+                    draw_board(fun.canvas, True, 0, 50,
+                               create_chess_array(fun.board))
             except:
                 pass
 
-            if game.board.is_checkmate() == True:
-                game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+            if fun.board.is_checkmate() == True:
+                fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
-                game.canvas.create_text((60 * 8 + 20)//2, 
+                fun.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2,
                                          text="ŠACH MAT",
                                          font=('Helvetica','50','bold'))  
-            elif game.board.is_stalemate() == True:
-                game.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
+            elif fun.board.is_stalemate() == True:
+                fun.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
                                               fill="grey", outline="black")
-                game.canvas.create_text((60 * 8 + 20)//2-5, 
+                fun.canvas.create_text((60 * 8 + 20)//2-5, 
                                          (60 * 8 + 20 + 100)//2,
                                          text="REMÍZA",
                                          font=('Helvetica','50','bold'))
-                game.canvas.create_text((60 * 8 + 20)//2, 
+                fun.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2+40,
                                          text="Patová situácia",
                                          font=('Helvetica','15','bold'))
-            elif game.board.is_insufficient_material() == True:
-                game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+            elif fun.board.is_insufficient_material() == True:
+                fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
-                game.canvas.create_text((60 * 8 + 20)//2-5, 
+                fun.canvas.create_text((60 * 8 + 20)//2-5, 
                                          (60 * 8 + 20 + 100)//2,
                                          text="REMÍZA",
                                          font=('Helvetica','50','bold'))
-                game.canvas.create_text((60 * 8 + 20)//2, 
+                fun.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2+40,
                                          text="Nedostatok materiálu",
                                          font=('Helvetica','15','bold'))
-            elif game.board.can_claim_threefold_repetition() == True:
-                game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+            elif fun.board.can_claim_threefold_repetition() == True:
+                fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
-                game.canvas.create_text((60 * 8 + 20)//2, 
+                fun.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2-5,
                                          text="REMÍZA",
                                          font=('Helvetica','50','bold'))
-                game.canvas.create_text((60 * 8 + 20)//2, 
+                fun.canvas.create_text((60 * 8 + 20)//2, 
                                          (60 * 8 + 20 + 100)//2+40,
                                          text="Opakovanie ťahou",
                                          font=('Helvetica','15','bold'))
 
 
-# --------------------- game functions ---------------------
-def game():
-    menu.window.destroy()
+class Menu:
+    def __init__(self) -> None:
+        # vytvorenie noveho okna
+        self.window = tk.Tk()
+        self.window.title("Menu")
 
-    # vytvorenie noveho okna
-    game.window = tk.Tk()
-    game.window.title('Hra s priteľom')
+        # vytvorenie noveho platna
+        W = 750
+        H = 60 * 8 + 20
+        self.canvas = Canvas(width=W, height=H,bg='white')
+        self.canvas.pack()
 
-    W = 60 * 8 + 20
-    H = 60 * 8 + 20 + 100
-    game.canvas = Canvas(width=W, height=H, bg='white')
-    game.canvas.pack()
+        # menu buttons
+        Button(self.canvas, text = "Hra s priaťelom", command=self.game,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40)
+        Button(self.canvas, text = "Precvičenie otvorení", command=self.openings,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
+        Button(self.canvas, text = "Pravidlá", command=self.rules, height= 3,
+               width=28).place(x = 60*8+2*20, y = 420)
+        
+        # vykreslenie sachovnice
+        draw_board(self.canvas, False)
 
-    # vykreslenie sachovnice
-    draw_board(game.canvas, False, 0, 50)
+        self.canvas.mainloop()
 
-    # button START
-    b = Button(game.canvas, text="START", command=game_start, height=2, width=20)
-    b.place(x=10, y=H-50)
+    def openings(self):
+        self.window.destroy()
+        rules_window = Tk()  # Vytvořte nové okno
+        rules_window.title('Šachové otvorenia')
 
-    game.canvas.mainloop()
+        W = 500
+        H = 500
+        p = Canvas(width=W, height=H,bg='white')
+        p.pack()
 
-def game_start():
-    game.board = chess.Board()
-    draw_board(game.canvas, True, 0, 50, create_chess_array(game.board))
+    def rules(self):
+        self.window.destroy()
+        rules_window = Tk()  # Vytvořte nové okno
+        rules_window.title('Pravidlá šachu')
 
-    # button MENU
-    b = Button(game.canvas, text="Menu", command=game_end, height=2, width=20)
-    b.place(x=10, y=60*8+20+100-50)
+        W = 500
+        H = 500
+        p = Canvas(width=W, height=H,bg='white')
+        p.pack()
 
-    # urcovanie suradnic
-    game.canvas.bind("<Button-1>", on_click)
-    game.position = "...."
-
-def game_end():
-    game.window.destroy()
-    menu()
-# --------------------- game functions ---------------------
+        p.create_text(W//2, 30, text = "DDD", fill="black")
+    
+    def game(self):
+        self.window.destroy()
+        Game()
 
 
-def menu():
-    menu.window = Tk()
-    menu.window.title("Menu")
+class Game:
+    def __init__(self) -> None:
+        # vytvorenie noveho okna
+        self.window = tk.Tk()
+        self.window.title('Hra s priteľom')
 
-    W = 750
-    H = 60 * 8 + 20
-    menu.canvas = Canvas(width=W, height=H,bg='white')
-    menu.canvas.pack()
+        # premenné pre funkciu on_click
+        Game.position = "...."
+        Game.board = chess.Board()
 
-    menu_buttons()
-    draw_board(menu.canvas, False)
-    menu.canvas.mainloop()
+        # vytvorenie noveho platna
+        W = 60 * 8 + 20
+        H = 60 * 8 + 20 + 100
+        self.canvas = Canvas(width=W, height=H, bg='white')
+        self.canvas.pack()
 
-# ----------------------- menu buttons -----------------------
-def menu_buttons():
-    Button(menu.canvas, text = "Hra s priaťelom", command=game_menu, height= 3, width=28).place(x = 60*8+2*20, y = 40)
-    Button(menu.canvas, text = "Precvičenie otvorení", command=openings, height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
-    # Button(menu.canvas, text = "Rapid", command=rapid, height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
-    Button(menu.canvas, text = "Pravidlá", command=rules, height= 3, width=28).place(x = 60*8+2*20, y = 420)
+        # vykreslenie sachovnice
+        draw_board(self.canvas, False, 0, 50)
 
-def openings():
-    menu.window.destroy()
-    rules_window = Tk()  # Vytvořte nové okno
-    rules_window.title('Pravidlá šachu')
+        # button START
+        b = Button(self.canvas, text="START", command=self.game_start, height=2, width=20)
+        b.place(x=10, y=H-50)
 
-    W = 500
-    H = 500
-    p = Canvas(width=W, height=H,bg='white')
-    p.pack()
+        self.canvas.mainloop()
 
-def rules():
-    menu.window.destroy()
-    rules_window = Tk()  # Vytvořte nové okno
-    rules_window.title('Pravidlá šachu')
+    def game_start(self):
+        draw_board(self.canvas, True, 0, 50, create_chess_array(Game.board))
+        
+        # button MENU
+        Button(self.canvas, text="Menu", command=self.game_end,
+               height=2, width=20).place(x=10, y=60*8+20+100-50)
 
-    W = 500
-    H = 500
-    p = Canvas(width=W, height=H,bg='white')
-    p.pack()
+        # urcovanie suradnic
+        self.canvas.bind("<Button-1>", self.on_click)
 
-    p.create_text(W//2, 30, text = "DDD", fill="black")
-# ----------------------- menu buttons -----------------------
+    def on_click(self, action):
+        piece_move(action.x, action.y, Game)
+        draw_board(self.canvas, True, 0, 50, create_chess_array(Game.board))
 
-def game_menu():
-    game()
 
-menu()
+    def game_end(self):
+        self.window.destroy()
+        Menu()
+
+
+Menu()
