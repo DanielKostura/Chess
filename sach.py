@@ -81,25 +81,36 @@ def piece_move(x, y, fun):
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 60) // 60)
 
-            print(Game.board)
             fun.position += file + rank
             fun.position = fun.position[2:]
 
             try:
                 if chess.Move.from_uci(fun.position) in fun.board.legal_moves:
+                    # urobenie tahu
                     fun.board.push_san(fun.position)
+
+                    # zainanie hodiniek
+                    if Game.board.turn == chess.WHITE:
+                        white_timer.start_timer()
+                        black_timer.stop_timer()
+                    else:
+                        black_timer.start_timer()
+                        white_timer.stop_timer()
+
+                    # vykreslenie tahu
                     draw_board(fun.canvas, True, 0, 50,
                                create_chess_array(fun.board))
+
             except:
                 pass
 
             if fun.board.is_checkmate() == True:
                 fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
-                                              fill="lightgrey", outline="black")
+                                             fill="lightgrey", outline="black")
                 fun.canvas.create_text((60 * 8 + 20)//2, 
-                                         (60 * 8 + 20 + 100)//2,
-                                         text="ŠACH MAT",
-                                         font=('Helvetica','50','bold'))  
+                                       (60 * 8 + 20 + 100)//2,
+                                        text="ŠACH MAT",
+                                        font=('Helvetica','50','bold'))  
             elif fun.board.is_stalemate() == True:
                 fun.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
                                               fill="grey", outline="black")
@@ -144,21 +155,21 @@ class Menu:
         # vytvorenie noveho platna
         W = 750
         H = 60 * 8 + 20
-        self.canvas = Canvas(width=W, height=H,bg='white')
-        self.canvas.pack()
+        Game.canvas = Canvas(width=W, height=H,bg='white')
+        Game.canvas.pack()
 
         # menu buttons
-        Button(self.canvas, text = "Hra s priaťelom", command=self.game,
+        Button(Game.canvas, text = "Hra s priaťelom", command=self.game,
                height= 3, width=28).place(x = 60*8+2*20, y = 40)
-        Button(self.canvas, text = "Precvičenie otvorení", command=self.openings,
+        Button(Game.canvas, text = "Precvičenie otvorení", command=self.openings,
                height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
-        Button(self.canvas, text = "Pravidlá", command=self.rules, height= 3,
+        Button(Game.canvas, text = "Pravidlá", command=self.rules, height= 3,
                width=28).place(x = 60*8+2*20, y = 420)
         
         # vykreslenie sachovnice
-        draw_board(self.canvas, False)
+        draw_board(Game.canvas, False)
 
-        self.canvas.mainloop()
+        Game.canvas.mainloop()
 
     def openings(self):
         self.window.destroy()
@@ -193,42 +204,87 @@ class Game:
         self.window = tk.Tk()
         self.window.title('Hra s priteľom')
 
-        # premenné pre funkciu on_click
+        self.W = 60 * 8 + 20
+        self.H = 60 * 8 + 20 + 100
+
+        # premenné pre funkciu piece_move
         Game.position = "...."
         Game.board = chess.Board()
-
+        Game.white_on_turn = True
+        
         # vytvorenie noveho platna
-        W = 60 * 8 + 20
-        H = 60 * 8 + 20 + 100
-        self.canvas = Canvas(width=W, height=H, bg='white')
-        self.canvas.pack()
+        Game.canvas = Canvas(width=self.W, height=self.H, bg='white')
+        Game.canvas.pack()
 
         # vykreslenie sachovnice
-        draw_board(self.canvas, False, 0, 50)
+        draw_board(Game.canvas, False, 0, 50)
 
         # button START
-        b = Button(self.canvas, text="START", command=self.game_start, height=2, width=20)
-        b.place(x=10, y=H-50)
+        Button(Game.canvas, text="START", command=self.game_start,
+               height=2, width=20).place(x=self.W-160-15, y=self.H-50)
 
-        self.canvas.mainloop()
+        Game.canvas.mainloop()
 
     def game_start(self):
-        draw_board(self.canvas, True, 0, 50, create_chess_array(Game.board))
+        draw_board(Game.canvas, True, 0, 50, create_chess_array(Game.board))
 
         # button MENU
-        Button(self.canvas, text="Menu", command=self.game_end,
-               height=2, width=20).place(x=10, y=60*8+20+100-50)
+        Button(Game.canvas, text="Menu", command=self.game_end,
+               height=2, width=20).place(x=self.W-160-15, y=self.H-50)
+
+        # timers
+        global black_timer, white_timer
+        black_timer = Timer(Game.canvas, 10, 0, 3, 10+15, 10)
+        white_timer = Timer(Game.canvas, 10, 0, 3, 10+15, self.H-50)
+
+        white_timer.start_timer()
 
         # urcovanie suradnic
-        self.canvas.bind("<Button-1>", self.on_click)
+        Game.canvas.bind("<Button-1>", self.on_click)
 
     def on_click(self, action):
         piece_move(action.x, action.y, Game)
-        draw_board(self.canvas, True, 0, 50, create_chess_array(Game.board))
+        draw_board(Game.canvas, True, 0, 50, create_chess_array(Game.board))
 
     def game_end(self):
         self.window.destroy()
         Menu()
 
+
+class Timer:
+    def __init__(self, canvas, min, sec, bonus, x, y):
+        self.canvas = canvas
+        self.time = min*60 + sec
+        self.bonus = bonus
+        self.formated_time = tk.StringVar()
+        self.formated_time.set(self.format_time())
+        
+        self.time_label = tk.Label(canvas, textvariable=self.formated_time,
+                                   font=("Arial", 24)).place(x=x, y=y)
+
+        self.active_timer = None
+
+    def format_time(self):
+        mins = self.time // 60
+        secs = self.time % 60
+        return f"{mins:02}:{secs:02}"
+
+    def update_time(self):
+        if self.time > 0:
+            self.time -= 1
+            self.formated_time.set(self.format_time())
+            self.active_timer = self.canvas.after(1000, self.update_time)
+        else:
+            pass
+            # tu pojde ze si prehral na cas
+
+    def start_timer(self):
+        self.update_time()
+
+    def stop_timer(self):
+        if self.active_timer is not None:
+            self.time += self.bonus
+            self.formated_time.set(self.format_time())
+            self.canvas.after_cancel(self.active_timer)
 
 Menu()
