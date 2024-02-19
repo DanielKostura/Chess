@@ -6,7 +6,7 @@ import chess
 # python -m pip install chess
 
 def draw_board(current_canvas: Tk, pieces: bool, bonus_x=0, bonus_y=0,
-               chess_board: list[list[str]]=[[""]]):
+               board: list[list[str]]=[[""]]):
     for row in range(8):
         for column in range(8):
             if (row + column) % 2 == 1:
@@ -20,7 +20,6 @@ def draw_board(current_canvas: Tk, pieces: bool, bonus_x=0, bonus_y=0,
                                             fill=farba ,outline='black',width='5')
     
             if pieces == True:
-                board = chess_board
                 current_canvas.create_text(x+30, y+30, text=board[row][column],
                                            font=('Helvetica','50','bold'))
 
@@ -89,7 +88,7 @@ def piece_move(x, y, fun):
                     # urobenie tahu
                     fun.board.push_san(fun.position)
 
-                    # zainanie hodiniek
+                    # zapinanie hodiniek
                     if Game.board.turn == chess.WHITE:
                         white_timer.start_timer()
                         black_timer.stop_timer()
@@ -105,6 +104,8 @@ def piece_move(x, y, fun):
                 pass
 
             if fun.board.is_checkmate() == True:
+                white_timer.stop_timer()
+                black_timer.stop_timer()
                 fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                              fill="lightgrey", outline="black")
                 fun.canvas.create_text((60 * 8 + 20)//2, 
@@ -112,6 +113,8 @@ def piece_move(x, y, fun):
                                         text="ŠACH MAT",
                                         font=('Helvetica','50','bold'))  
             elif fun.board.is_stalemate() == True:
+                white_timer.stop_timer()
+                black_timer.stop_timer()
                 fun.canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
                                               fill="grey", outline="black")
                 fun.canvas.create_text((60 * 8 + 20)//2-5, 
@@ -123,6 +126,8 @@ def piece_move(x, y, fun):
                                          text="Patová situácia",
                                          font=('Helvetica','15','bold'))
             elif fun.board.is_insufficient_material() == True:
+                white_timer.stop_timer()
+                black_timer.stop_timer()
                 fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
                 fun.canvas.create_text((60 * 8 + 20)//2-5, 
@@ -134,6 +139,8 @@ def piece_move(x, y, fun):
                                          text="Nedostatok materiálu",
                                          font=('Helvetica','15','bold'))
             elif fun.board.can_claim_threefold_repetition() == True:
+                white_timer.stop_timer()
+                black_timer.stop_timer()
                 fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                               fill="lightgrey", outline="black")
                 fun.canvas.create_text((60 * 8 + 20)//2, 
@@ -244,9 +251,10 @@ class Game:
 
     def on_click(self, action):
         piece_move(action.x, action.y, Game)
-        draw_board(Game.canvas, True, 0, 50, create_chess_array(Game.board))
 
     def game_end(self):
+        white_timer.stop_timer()
+        black_timer.stop_timer()
         self.window.destroy()
         Menu()
 
