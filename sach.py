@@ -108,10 +108,20 @@ def piece_move(x, y, fun):
                 black_timer.stop_timer()
                 fun.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                              fill="lightgrey", outline="black")
-                fun.canvas.create_text((60 * 8 + 20)//2, 
-                                       (60 * 8 + 20 + 100)//2,
-                                        text="ŠACH MAT",
-                                        font=('Helvetica','50','bold'))  
+                fun.canvas.create_text((60 * 8 + 20)//2-5, 
+                                         (60 * 8 + 20 + 100)//2,
+                                         text="VÝHRA",
+                                         font=('Helvetica','50','bold'))
+                if Game.board.turn == chess.BLACK:
+                    fun.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2+40,
+                                            text="Biely vyhral šachmatom",
+                                            font=('Helvetica','15','bold'))
+                else:
+                    fun.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2+40,
+                                            text="Čierny vyhral šachmatom",
+                                            font=('Helvetica','15','bold'))
             elif fun.board.is_stalemate() == True:
                 white_timer.stop_timer()
                 black_timer.stop_timer()
@@ -162,31 +172,29 @@ class Menu:
         # vytvorenie noveho platna
         W = 750
         H = 60 * 8 + 20
-        Game.canvas = Canvas(width=W, height=H,bg='white')
-        Game.canvas.pack()
+        Menu.canvas = Canvas(width=W, height=H,bg='white')
+        Menu.canvas.pack()
 
         # menu buttons
-        Button(Game.canvas, text = "Hra s priaťelom", command=self.game,
+        Button(Menu.canvas, text = "Hra s priaťelom", command=self.gameMenu,
                height= 3, width=28).place(x = 60*8+2*20, y = 40)
-        Button(Game.canvas, text = "Precvičenie otvorení", command=self.openings,
+        Button(Menu.canvas, text = "Precvičenie otvorení", command=self.openingLearner,
                height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
-        Button(Game.canvas, text = "Pravidlá", command=self.rules, height= 3,
+        Button(Menu.canvas, text = "Pravidlá", command=self.rules, height= 3,
                width=28).place(x = 60*8+2*20, y = 420)
         
         # vykreslenie sachovnice
-        draw_board(Game.canvas, False)
+        draw_board(Menu.canvas, False)
 
-        Game.canvas.mainloop()
+        Menu.canvas.mainloop()
 
-    def openings(self):
+    def gameMenu(self):
         self.window.destroy()
-        rules_window = Tk()  # Vytvořte nové okno
-        rules_window.title('Šachové otvorenia')
+        GameMenu()
 
-        W = 500
-        H = 500
-        p = Canvas(width=W, height=H,bg='white')
-        p.pack()
+    def openingLearner(self):
+        self.window.destroy()
+        OpeningLearner()
 
     def rules(self):
         self.window.destroy()
@@ -199,20 +207,68 @@ class Menu:
         p.pack()
 
         p.create_text(W//2, 30, text = "DDD", fill="black")
-    
-    def game(self):
-        self.window.destroy()
-        Game()
 
+
+class GameMenu:
+    def __init__(self) -> None:
+        # vytvorenie noveho okna
+        self.window = tk.Tk()
+        self.window.title("Menu")
+
+        # vytvorenie noveho platna
+        W = 750
+        H = 60 * 8 + 20
+        GameMenu.canvas = Canvas(width=W, height=H,bg='white')
+        GameMenu.canvas.pack()
+
+        
+        # menu buttons
+        Button(GameMenu.canvas, text = "1 + 0", command=self.blitz,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40)
+        Button(GameMenu.canvas, text = "1 + 1", command=self.blitz_bonus,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
+        Button(GameMenu.canvas, text = "10 + 0", command=self.rapid,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
+        Button(GameMenu.canvas, text = "10 + 3", command=self.rapid_bonus,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40+75*3)
+        Button(GameMenu.canvas, text = "Menu", command=self.menu, height= 3,
+               width=28).place(x = 60*8+2*20, y = 420)
+        
+        # vykreslenie sachovnice
+        draw_board(GameMenu.canvas, False)
+
+        GameMenu.canvas.mainloop()
+
+    def blitz(self):
+        self.window.destroy()
+        Game(1*60, 0)
+
+    def blitz_bonus(self):
+        self.window.destroy()
+        Game(1*60, 1)
+
+    def rapid(self):
+        self.window.destroy()
+        Game(10*60, 0)
+    
+    def rapid_bonus(self):
+        self.window.destroy()
+        Game(10*60, 3)
+
+    def menu(self):
+        self.window.destroy()
+        Menu()
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, time, bonus) -> None:
         # vytvorenie noveho okna
         self.window = tk.Tk()
         self.window.title('Hra s priteľom')
 
         self.W = 60 * 8 + 20
         self.H = 60 * 8 + 20 + 100
+        self.time = time
+        self.bonus = bonus
 
         # premenné pre funkciu piece_move
         Game.position = "...."
@@ -241,8 +297,8 @@ class Game:
 
         # timers
         global black_timer, white_timer
-        black_timer = Timer(Game.canvas, 10, 0, 3, 10+15, 10)
-        white_timer = Timer(Game.canvas, 10, 0, 3, 10+15, self.H-50)
+        black_timer = Timer(Game.canvas, self.time, self.bonus, 10+15, 10)
+        white_timer = Timer(Game.canvas, self.time, self.bonus, 10+15, self.H-50)
 
         white_timer.start_timer()
 
@@ -258,11 +314,10 @@ class Game:
         self.window.destroy()
         Menu()
 
-
 class Timer:
-    def __init__(self, canvas, min, sec, bonus, x, y):
+    def __init__(self, canvas, time, bonus, x, y):
         self.canvas = canvas
-        self.time = min*60 + sec
+        self.time = time
         self.bonus = bonus
         self.formated_time = tk.StringVar()
         self.formated_time.set(self.format_time())
@@ -277,22 +332,77 @@ class Timer:
         secs = self.time % 60
         return f"{mins:02}:{secs:02}"
 
-    def update_time(self):
+    def start_timer(self):
         if self.time > 0:
             self.time -= 1
             self.formated_time.set(self.format_time())
-            self.active_timer = self.canvas.after(1000, self.update_time)
+            self.active_timer = self.canvas.after(1000, self.start_timer)
         else:
-            pass
-            # tu pojde ze si prehral na cas
-
-    def start_timer(self):
-        self.update_time()
+            white_timer.stop_timer()
+            black_timer.stop_timer()
+            Game.canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                         fill="lightgrey", outline="black")
+            
+            if Game.board.can_claim_draw():
+                Game.canvas.create_text((60 * 8 + 20)//2-5, 
+                                    (60 * 8 + 20 + 100)//2,
+                                     text="REMÍZA",
+                                     font=('Helvetica','50','bold'))
+                Game.canvas.create_text((60 * 8 + 20)//2, 
+                                        (60 * 8 + 20 + 100)//2+40,
+                                        text="Nedostatok času a nedostatok materiálu",
+                                        font=('Helvetica','15','bold'))
+            else:
+                Game.canvas.create_text((60 * 8 + 20)//2-5, 
+                                        (60 * 8 + 20 + 100)//2,
+                                        text="VÝHRA",
+                                        font=('Helvetica','50','bold'))
+                if Game.board.turn == chess.BLACK:
+                    Game.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2+40,
+                                            text="biely vyhral - nedostatok času",
+                                            font=('Helvetica','15','bold'))
+                else:
+                    Game.canvas.create_text((60 * 8 + 20)//2, 
+                                            (60 * 8 + 20 + 100)//2+40,
+                                            text="čierny vyhral - nedostatok času",
+                                            font=('Helvetica','15','bold'))
 
     def stop_timer(self):
         if self.active_timer is not None:
             self.time += self.bonus
             self.formated_time.set(self.format_time())
             self.canvas.after_cancel(self.active_timer)
+
+
+class OpeningLearner:
+    def __init__(self) -> None:
+        # vytvorenie noveho okna
+        self.window = tk.Tk()
+        self.window.title("Menu")
+
+        # vytvorenie noveho platna
+        W = 750
+        H = 60 * 8 + 20
+        OpeningLearner.canvas = Canvas(width=W, height=H,bg='white')
+        OpeningLearner.canvas.pack()
+        
+        # OpeningLearner buttons
+        Button(OpeningLearner.canvas, text = "Vytvoriť nové otvorenie", command=self.new_opening,
+               height= 3, width=28).place(x = 60*8+2*20, y = 40)
+        Button(OpeningLearner.canvas, text = "Menu", command=self.menu, height= 3,
+               width=28).place(x = 60*8+2*20, y = 420)
+
+        # vykreslenie sachovnice
+        draw_board(OpeningLearner.canvas, False)
+
+        OpeningLearner.canvas.mainloop()
+    
+    def new_opening(self):
+        pass
+
+    def menu(self):
+        self.window.destroy()
+        Menu()
 
 Menu()
