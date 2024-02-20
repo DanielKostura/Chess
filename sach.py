@@ -178,7 +178,7 @@ class Menu:
         # menu buttons
         Button(Menu.canvas, text = "Hra s priaťelom", command=self.gameMenu,
                height= 3, width=28).place(x = 60*8+2*20, y = 40)
-        Button(Menu.canvas, text = "Precvičenie otvorení", command=self.openingLearner,
+        Button(Menu.canvas, text = "Precvičenie otvorení", command=self.openingLearnerMenu,
                height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
         Button(Menu.canvas, text = "Pravidlá", command=self.rules, height= 3,
                width=28).place(x = 60*8+2*20, y = 420)
@@ -192,9 +192,9 @@ class Menu:
         self.window.destroy()
         GameMenu()
 
-    def openingLearner(self):
+    def openingLearnerMenu(self):
         self.window.destroy()
-        OpeningLearner()
+        OpeningLearnerMenu()
 
     def rules(self):
         self.window.destroy()
@@ -218,26 +218,26 @@ class GameMenu:
         # vytvorenie noveho platna
         W = 750
         H = 60 * 8 + 20
-        GameMenu.canvas = Canvas(width=W, height=H,bg='white')
-        GameMenu.canvas.pack()
+        self.canvas = Canvas(width=W, height=H,bg='white')
+        self.canvas.pack()
 
         
         # menu buttons
-        Button(GameMenu.canvas, text = "1 + 0", command=self.blitz,
+        Button(self.canvas, text = "1 + 0", command=self.blitz,
                height= 3, width=28).place(x = 60*8+2*20, y = 40)
-        Button(GameMenu.canvas, text = "1 + 1", command=self.blitz_bonus,
+        Button(self.canvas, text = "1 + 1", command=self.blitz_bonus,
                height= 3, width=28).place(x = 60*8+2*20, y = 40+75)
-        Button(GameMenu.canvas, text = "10 + 0", command=self.rapid,
+        Button(self.canvas, text = "10 + 0", command=self.rapid,
                height= 3, width=28).place(x = 60*8+2*20, y = 40+75*2)
-        Button(GameMenu.canvas, text = "10 + 3", command=self.rapid_bonus,
+        Button(self.canvas, text = "10 + 3", command=self.rapid_bonus,
                height= 3, width=28).place(x = 60*8+2*20, y = 40+75*3)
-        Button(GameMenu.canvas, text = "Menu", command=self.menu, height= 3,
+        Button(self.canvas, text = "Menu", command=self.menu, height= 3,
                width=28).place(x = 60*8+2*20, y = 420)
         
         # vykreslenie sachovnice
-        draw_board(GameMenu.canvas, False)
+        draw_board(self.canvas, False)
 
-        GameMenu.canvas.mainloop()
+        self.canvas.mainloop()
 
     def blitz(self):
         self.window.destroy()
@@ -306,7 +306,8 @@ class Game:
         Game.canvas.bind("<Button-1>", self.on_click)
 
     def on_click(self, action):
-        piece_move(action.x, action.y, Game)
+        if white_timer.time > 0 and black_timer.time > 0:
+            piece_move(action.x, action.y, Game)
 
     def game_end(self):
         white_timer.stop_timer()
@@ -375,7 +376,7 @@ class Timer:
             self.canvas.after_cancel(self.active_timer)
 
 
-class OpeningLearner:
+class OpeningLearnerMenu:
     def __init__(self) -> None:
         # vytvorenie noveho okna
         self.window = tk.Tk()
@@ -384,25 +385,92 @@ class OpeningLearner:
         # vytvorenie noveho platna
         W = 750
         H = 60 * 8 + 20
-        OpeningLearner.canvas = Canvas(width=W, height=H,bg='white')
-        OpeningLearner.canvas.pack()
+        self.canvas = Canvas(width=W, height=H,bg='white')
+        self.canvas.pack()
         
-        # OpeningLearner buttons
-        Button(OpeningLearner.canvas, text = "Vytvoriť nové otvorenie", command=self.new_opening,
-               height= 3, width=28).place(x = 60*8+2*20, y = 40)
-        Button(OpeningLearner.canvas, text = "Menu", command=self.menu, height= 3,
-               width=28).place(x = 60*8+2*20, y = 420)
+        # OpeningLearnerMenu buttons
+        Button(self.canvas, text = "Vytvoriť nové otvorenie",
+               command=self.new_opening, height= 3, width=28).place(x = 60*8+2*20,
+                                                                    y = 40)
+        Button(self.canvas, text = "Menu", command=self.menu,
+               height= 3, width=28).place(x = 60*8+2*20, y = 420)
 
         # vykreslenie sachovnice
-        draw_board(OpeningLearner.canvas, False)
+        draw_board(self.canvas, False)
 
-        OpeningLearner.canvas.mainloop()
+        self.canvas.mainloop()
     
     def new_opening(self):
-        pass
+        self.window.destroy()
+        OpeningCreator()
 
     def menu(self):
         self.window.destroy()
         Menu()
 
+class OpeningCreator:
+    def __init__(self) -> None:
+        # vytvorenie noveho okna
+        self.window = tk.Tk()
+        self.window.title('Hra s priteľom')
+
+        self.W = 60 * 8 + 20
+        self.H = 60 * 8 + 20 + 100
+        self.file = "opening.txt"
+
+        # premenné pre funkciu piece_move
+        OpeningCreator.position = "...."
+        OpeningCreator.board = chess.Board()
+        OpeningCreator.white_on_turn = True
+        
+        # vytvorenie noveho platna
+        OpeningCreator.canvas = Canvas(width=self.W, height=self.H, bg='white')
+        OpeningCreator.canvas.pack()
+
+        # vykreslenie sachovnice
+        draw_board(OpeningCreator.canvas, True, 0, 50,
+                   create_chess_array(OpeningCreator.board))
+
+        # OpeningCreator buttons
+        Button(OpeningCreator.canvas, text="Menu", command=self.end,
+               height=2, width=20).place(x=self.W-160-15, y=self.H-50)
+        Button(OpeningCreator.canvas, text="Vymaž", command=self.delete,
+               height=2, width=20).place(x=self.W-160-15, y=self.H-50)
+        
+        OpeningCreator.canvas.bind("<Button-1>", self.noted)
+
+        OpeningCreator.canvas.mainloop()
+    
+    def noted(self, action):
+        x = action.x
+        y = action.y
+        if 10 < x < 60*8 + 10 and 60 < y < 60*9:
+            file = chr(ord('a') + (x - 10) // 60)
+            rank = str(8 - (y - 60) // 60)
+
+            OpeningCreator.position += file + rank
+            OpeningCreator.position = OpeningCreator.position[2:]
+            try:
+                if chess.Move.from_uci(OpeningCreator.position) in OpeningCreator.board.legal_moves:
+                    # urobenie tahu
+                    OpeningCreator.board.push_san(OpeningCreator.position)
+
+                    # zaznacenie tahu
+                    with open(self.file, "a") as f:
+                        print(OpeningCreator.position, end="" ,file=f)
+
+                    # vykreslenie tahu
+                    draw_board(OpeningCreator.canvas, True, 0, 50,
+                               create_chess_array(OpeningCreator.board))
+
+            except:
+                pass
+
+    def delete(self):
+        with open(self.file, "a") as f:
+            pass
+    
+    def end(self):
+        self.window.destroy()
+        OpeningLearnerMenu()
 Menu()
