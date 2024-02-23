@@ -1,29 +1,33 @@
-from tkinter import *
+import tkinter as tk
 
-def on_select(event):
-    # Get the index of the selected item
-    index = mylist.curselection()
-    if index:
-        # Retrieve the text of the selected item
-        selected_item = mylist.get(index)
-        # Print different messages based on the selected item
-        if selected_item == "This is line number 1":
-            print("ahoj")
-        elif selected_item == "This is line number 2":
-            print("BU")
+def clean_canvas():
+    # Delete all objects on the canvas
+    canvas.delete("all")
+    
+    # Destroy or remove buttons, labels, and entries
+    for widget in [button1, label1, entry1]:
+        widget.destroy()
 
-root = Tk()
-scrollbar = Scrollbar(root)
-scrollbar.pack(side=RIGHT, fill=Y)
+# Create the main window
+root = tk.Tk()
+root.geometry("400x400")
 
-mylist = Listbox(root, yscrollcommand=scrollbar.set)
-for line in range(1, 100):
-    mylist.insert(END, str(line) + ". This is line number")
+# Create a canvas
+canvas = tk.Canvas(root, bg="white")
+canvas.pack(fill=tk.BOTH, expand=True)
 
-mylist.pack(side=LEFT, fill=BOTH)
-scrollbar.config(command=mylist.yview)
+# Add some objects to the canvas
+canvas.create_rectangle(50, 50, 150, 150, fill="blue")
 
-# Bind left mouse button click event to on_select function
-mylist.bind('<Button-1>', on_select)
+# Create some other widgets
+button1 = tk.Button(root, text="Clean Canvas", command=clean_canvas)
+button1.pack()
 
-mainloop()
+label1 = tk.Label(root, text="Label")
+label1.pack()
+
+entry1 = tk.Entry(root)
+entry1.pack()
+
+# Run the Tkinter event loop
+root.mainloop()

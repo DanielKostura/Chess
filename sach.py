@@ -186,6 +186,7 @@ class Menu:
         # vykreslenie sachovnice
         draw_board(Menu.canvas, False)
 
+        Menu.canvas.delete("all")
         Menu.canvas.mainloop()
 
     def gameMenu(self):
@@ -388,10 +389,17 @@ class OpeningLearnerMenu:
         self.canvas = Canvas(width=W, height=H,bg='white')
         self.canvas.pack()
         
+        OpeningLearnerMenu.filename = tk.StringVar()
         # OpeningLearnerMenu buttons
+        Label(self.canvas, text = "Zadaj názov otvorenia:").place(x = 60*8+2*20+40, 
+                                                                  y = 40)
+        Entry(self.canvas, textvariable = OpeningLearnerMenu.filename, 
+              font=('calibre', 10, 'normal'), bg="lightgrey").place(x = 60*8+2*20+30, 
+                                                                    y = 70)
         Button(self.canvas, text = "Vytvoriť nové otvorenie",
-               command=self.new_opening, height= 3, width=28).place(x = 60*8+2*20,
-                                                                    y = 40)
+               command=self.new_opening, height= 2, width=22).place(x = 60*8+2*20+18,
+                                                                    y = 100)
+
         Button(self.canvas, text = "Menu", command=self.menu,
                height= 3, width=28).place(x = 60*8+2*20, y = 420)
 
@@ -437,7 +445,7 @@ class OpeningCreator:
         self.update_scroll_list()
 
         # OpeningCreator buttons
-        Button(OpeningCreator.canvas, text="Menu", command=self.end,
+        Button(OpeningCreator.canvas, text="UMenu", command=self.end,
                height=2, width=21).place(x=self.W-200, y=260)
         Button(OpeningCreator.canvas, text="Nový variant", command=self.new_variant,
                height=2, width=21).place(x=self.W-200, y=315)
