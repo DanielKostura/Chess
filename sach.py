@@ -5,8 +5,8 @@ import chess
 # pip install chess
 # python -m pip install chess
 
-def draw_board(pieces: bool, bonus_x=0, bonus_y=0,
-               board: list[list[str]]=[[""]]):
+def draw_board(pieces: bool, board: list[list[str]]=[[""]], 
+               bonus_x=0, bonus_y=0):
     for row in range(8):
         for column in range(8):
             if (row + column) % 2 == 1:
@@ -97,7 +97,7 @@ def piece_move(x, y, fun):
                         white_timer.stop_timer()
 
                     # vykreslenie tahu
-                    draw_board(True, 0, 50, create_chess_array(fun.board))
+                    draw_board(True, create_chess_array(fun.board), 0, 50)
 
             except:
                 pass
@@ -293,7 +293,7 @@ class Game:
         
 
         # vykreslenie sachovnice
-        draw_board(False, 0, 50)
+        draw_board(False, [[""]], 0, 50)
 
         # button START
         self.b1 = Button(canvas, text="START", command=self.game_start,
@@ -305,7 +305,7 @@ class Game:
     def game_start(self):
         self.b1.destroy()
 
-        draw_board(True, 0, 50, create_chess_array(Game.board))
+        draw_board(True, create_chess_array(Game.board), 0, 50)
 
         # button MENU
         self.bm = Button(canvas, text="Menu", command=self.game_end,
@@ -399,12 +399,13 @@ class Timer:
 
 class OpeningLearnerMenu:
     def __init__(self) -> None:
-        OpeningLearnerMenu.filename = tk.StringVar()
+        self.filemane = tk.StringVar()
+        
         # OpeningLearnerMenu buttons
         self.l1 = Label(canvas, text = "Zadaj názov otvorenia:")
         self.l1.place(x = 60*8+2*20+40, y = 40)
 
-        self.e1 = Entry(canvas, textvariable = OpeningLearnerMenu.filename, 
+        self.e1 = Entry(canvas, textvariable = self.filemane, 
                         font=('calibre', 10, 'normal'), bg="lightgrey")
         self.e1.place(x = 60*8+2*20+30, y = 70)
 
@@ -422,8 +423,15 @@ class OpeningLearnerMenu:
         canvas.mainloop()
     
     def new_opening(self):
-        self.clean_canvas()
-        OpeningCreator()
+        name = self.filemane.get()
+
+        if name != "":
+            self.clean_canvas()
+            OpeningCreator(name)
+        else:
+            canvas.create_text(w-20*2-88, 155,
+                               text="Musíte prve zadať názov otvorenia", 
+                               font=('Helvetica','10','bold'), fill="red")
 
     def menu(self):
         self.clean_canvas()
@@ -438,20 +446,25 @@ class OpeningLearnerMenu:
             widget.destroy()
 
 class OpeningCreator:
-    def __init__(self) -> None:
+    def __init__(self, file) -> None:
         self.variant = 0
-        self.file = "opening.txt"
+        self.putback = 0
+        self.file = file + ".txt"
 
-        # premenné pre funkciu piece_move
-        OpeningCreator.position = "...."
-        OpeningCreator.board = chess.Board()
-        OpeningCreator.white_on_turn = True
+        # vytvorenie subora
+        f = open(self.file, "w")
+        f.close()
+
+        # premenné pre funkciu noted
+        self.position = "...."
+        self.board = chess.Board()
 
         # vykreslenie sachovnice
-        draw_board(True, 0, 0, create_chess_array(OpeningCreator.board))
+        draw_board(True, create_chess_array(chess.Board()))
         
         # Scroll list
-        self.update_scroll_list()
+        self.mylist = Listbox(window, font=10)
+        self.mylist.place(x=w-200, y=40, height=200, width=157)
 
         # OpeningCreator buttons
         self.bm = Button(canvas, text="Menu", command=self.end,
@@ -485,51 +498,102 @@ class OpeningCreator:
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 10) // 60)
 
-            OpeningCreator.position += file + rank
-            OpeningCreator.position = OpeningCreator.position[2:]
-            print(OpeningCreator.position)
+            self.position += file + rank
+            self.position = self.position[2:]
+
             try:
-                if chess.Move.from_uci(OpeningCreator.position) in OpeningCreator.board.legal_moves:
-                    # urobenie tahu
-                    OpeningCreator.board.push_san(OpeningCreator.position)
-
+                if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     # zaznacenie tahu
-                    with open(self.file, "a") as f:
-                        print(OpeningCreator.position, end=" " ,file=f)
+                    with open(self.file, 'r') as f:
+                        lines = f.readlines()
 
+                    if lines == []:
+                        lines.append(self.position + " ")
+
+                    elif len(lines) == self.variant:
+                        lines.append(self.position + " ")
+
+                    elif lines[self.variant][-1] == "\n":
+                        lines[self.variant] = lines[self.variant][:-1] + self.position + " \n"
+                        
+                    elif lines[self.variant][-1] != "\n":
+                        lines[self.variant] += self.position + " "
+                        
+                    with open(self.file, 'w') as f:
+                        f.writelines(lines)
+                    
                     # vykreslenie tahu
-                    draw_board(True, 0, 0, create_chess_array(OpeningCreator.board))
+                    self.update_board()
+                    draw_board(True, create_chess_array(self.board))
 
                     self.update_scroll_list()
             except:
                 pass
 
     def update_scroll_list(self):
+        self.mylist.destroy()
         self.mylist = Listbox(window, font=10)
-        chess_line = self.read_specific_line(self.file, self.variant).split()
+        chess_line = self.read_specific_line(self.file, self.variant)
 
         for i in range(0, len(chess_line), 2):
             if len(chess_line) != i+1:
                 self.mylist.insert(END, str(i-(i//2)+1) + ". " + str(chess_line[i]) + "     " + str(chess_line[i+1]))
             else:
                 self.mylist.insert(END, str(i-(i//2)+1) + ". " + str(chess_line[i]))
-
+        
         self.mylist.place(x=w-200, y=40, height=200, width=157)
 
+    def update_board(self):
+        self.board = chess.Board()
+        chess_line = self.read_specific_line(self.file, self.variant)
+        #print(chess_line)
+
+        for i in range(len(chess_line)-self.putback):
+            self.board.push_san(chess_line[i])
+
+    def read_specific_line(self, filename, line_number):
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+        try:
+            return lines[line_number].split()
+        except:
+            return ""
+        
     def new_variant(self):
         with open(self.file, "a") as f:
             print("", end="\n", file=f)
-        draw_board(True, 0, 0, create_chess_array(OpeningCreator.board))
+        
+        with open(self.file, "r") as f:
+            num = len(f.readlines())
+
+        self.variant = num
+        self.update_board()
+        draw_board(True, create_chess_array(self.board))
 
     def delete(self):
-        with open(self.file, "a") as f:
-            pass
+        with open(self.file, "r") as f:
+            lines = f.readlines()
+
+        lines[self.variant] = lines[self.variant][:-5] + "\n"
+
+        with open(self.file, "w") as f:
+            f.writelines(lines)
+        
+        self.update_board()
+        draw_board(True, create_chess_array(self.board))
+        self.update_scroll_list()
 
     def back(self):
-        pass
+        if self.putback < len(self.read_specific_line(self.file, self.variant)):
+            self.putback += 1
+            self.update_board()
+            draw_board(True, create_chess_array(self.board))
 
     def next(self):
-        pass
+        if self.putback > 0:
+            self.putback -= 1
+            self.update_board()
+            draw_board(True, create_chess_array(self.board))
 
     def end(self):
         # Delete all objects on the canvas
@@ -541,12 +605,6 @@ class OpeningCreator:
 
         OpeningLearnerMenu()
     
-    def read_specific_line(self, filename, line_number):
-        with open(filename, 'r') as f:
-            # Preskočíme všetky riadky pred požadovaným riadkom
-            for _ in range(line_number):
-                f.readline()  
-            return f.readline()
 
 window = tk.Tk()
 window.title("Menu")
