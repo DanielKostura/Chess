@@ -162,6 +162,13 @@ def piece_move(x, y, fun):
                                     text="Opakovanie ťahou",
                                     font=('Helvetica','15','bold'))
 
+def clean_canvas(pole):
+    # Delete all objects on the canvas
+    canvas.delete("all")
+        
+    # Destroy or remove buttons, labels, and entries
+    for widget in pole:
+        widget.destroy()
 
 class Menu:
     def __init__(self) -> None:
@@ -189,11 +196,11 @@ class Menu:
         canvas.mainloop()
 
     def gameMenu(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3])
         GameMenu()
 
     def openingLearnerMenu(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3])
         OpeningLearnerMenu()
 
     def rules(self):
@@ -207,14 +214,6 @@ class Menu:
         p.pack()
 
         p.create_text(W//2, 30, text = "DDD", fill="black")
-
-    def clean_canvas(self):
-        # Delete all objects on the canvas
-        canvas.delete("all")
-        
-        # Destroy or remove buttons, labels, and entries
-        for widget in [self.b1, self.b2, self.b3]:
-            widget.destroy()
 
 
 
@@ -247,32 +246,24 @@ class GameMenu:
         canvas.mainloop()
 
     def blitz(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
         Game(1*60, 0)
 
     def blitz_bonus(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
         Game(1*60, 1)
 
     def rapid(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
         Game(10*60, 0)
     
     def rapid_bonus(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
         Game(10*60, 3)
 
     def menu(self):
-        self.clean_canvas()
+        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
         Menu()
-
-    def clean_canvas(self):
-        # Delete all objects on the canvas
-        canvas.delete("all")
-        
-        # Destroy or remove buttons, labels, and entries
-        for widget in [self.b1, self.b2, self.b3, self.b4, self.bm]:
-            widget.destroy()
 
 class Game:
     def __init__(self, time, bonus) -> None:
@@ -328,11 +319,11 @@ class Game:
             piece_move(action.x, action.y, Game)
 
     def game_end(self):
-        # Delete all objects on the canvas
-        canvas.delete("all")
+        clean_canvas([self.bm, black_timer.time_label, white_timer.time_label])
+        """canvas.delete("all")
         self.bm.destroy()
         black_timer.time_label.destroy()
-        white_timer.time_label.destroy()
+        white_timer.time_label.destroy()"""
 
         Menu()
 
@@ -403,16 +394,16 @@ class OpeningLearnerMenu:
         self.filemane = tk.StringVar()
         
         # OpeningLearnerMenu buttons
-        self.l1 = Label(canvas, text = "Zadaj názov otvorenia:")
-        self.l1.place(x = 60*8+2*20+40, y = 40)
+        self.l = Label(canvas, text = "Zadaj názov otvorenia:")
+        self.l.place(x = 60*8+2*20+40, y = 40)
 
-        self.e1 = Entry(canvas, textvariable = self.filemane, 
+        self.e = Entry(canvas, textvariable = self.filemane, 
                         font=('calibre', 10, 'normal'), bg="lightgrey")
-        self.e1.place(x = 60*8+2*20+30, y = 70)
+        self.e.place(x = 60*8+2*20+30, y = 70)
 
-        self.b1 = Button(canvas, text = "Vytvoriť nové otvorenie",
+        self.b = Button(canvas, text = "Vytvoriť nové otvorenie",
                          command=self.new_opening, height= 2, width=22)
-        self.b1.place(x = 60*8+2*20+18, y = 100)
+        self.b.place(x = 60*8+2*20+18, y = 100)
 
         self.bm = Button(canvas, text = "Menu", command=self.menu,
                            height= 3, width=28)
@@ -427,7 +418,7 @@ class OpeningLearnerMenu:
         name = self.filemane.get()
 
         if name != "":
-            self.clean_canvas()
+            clean_canvas([self.l, self.e, self.b, self.bm])
             OpeningCreator(name)
         else:
             canvas.create_text(w-20*2-88, 155,
@@ -435,16 +426,8 @@ class OpeningLearnerMenu:
                                font=('Helvetica','10','bold'), fill="red")
 
     def menu(self):
-        self.clean_canvas()
+        clean_canvas([self.l, self.e, self.b, self.bm])
         Menu()
-
-    def clean_canvas(self):
-        # Delete all objects on the canvas
-        canvas.delete("all")
-        
-        # Destroy or remove buttons, labels, and entries
-        for widget in [self.l1, self.e1, self.b1, self.bm]:
-            widget.destroy()
 
 class OpeningCreator:
     def __init__(self, file) -> None:
@@ -628,13 +611,8 @@ class OpeningCreator:
             draw_board(True, create_chess_array(self.board))
 
     def end(self):
-        # Delete all objects on the canvas
-        canvas.delete("all")
-        
-        # Destroy or remove buttons, labels, and entries
-        for widget in [self.bm, self.b1, self.b2, self.b3, self.b4, self.mylist]:
-            widget.destroy()
-
+        clean_canvas([self.bm, self.b1, self.b2, self.b3, self.b4, self.b5, 
+                      self.b5, self.b6, self.b7, self.mylist, self.e])
         OpeningLearnerMenu()
     
 
