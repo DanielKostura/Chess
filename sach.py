@@ -320,11 +320,6 @@ class Game:
 
     def game_end(self):
         clean_canvas([self.bm, black_timer.time_label, white_timer.time_label])
-        """canvas.delete("all")
-        self.bm.destroy()
-        black_timer.time_label.destroy()
-        white_timer.time_label.destroy()"""
-
         Menu()
 
 class Timer:
@@ -435,8 +430,9 @@ class OpeningCreator:
         self.putback = 0
         self.file = file + ".txt"
         self.name_variant = tk.StringVar()
+        self.notation = []
 
-        # vytvorenie subora
+        # vytvorenie/vycistenie suborov
         f = open(self.file, "w")
         f.close()
 
@@ -447,14 +443,17 @@ class OpeningCreator:
         # vykreslenie sachovnice
         draw_board(True, create_chess_array(chess.Board()))
         
-        # Scroll list
-        self.mylist = Listbox(window, font=10)
-        self.mylist.place(x=w-200, y=40, height=190, width=157)
+        # Scroll lists
+        self.moveList = Listbox(window, font=10)
+        self.moveList.place(x=w-200, y=40, height=190, width=157)
+
+        self.varList = Listbox(window, font=10)
 
         # OpeningCreator buttons
         self.b1 = Button(canvas, text="Zápis", command=self.update_scroll_list,
                          height=1, width=5)
         self.b1.place(x=w-200, y=18)
+        self.b1.config(state=tk.DISABLED)
 
         self.b2 = Button(canvas, text="Varinty", command=self.update_variant_list,
                          height=1, width=6)
@@ -472,7 +471,7 @@ class OpeningCreator:
                          height=2, width=21)
         self.bm.place(x=w-200, y=260+10)
 
-        self.b4 = Button(canvas, text="Nový variant", command=self.new_variant,
+        self.b4 = Button(canvas, text="Resetovať šachovnicu", command=self.reset,
                          height=2, width=21)
         self.b4.place(x=w-200, y=315+10)
 
@@ -483,10 +482,12 @@ class OpeningCreator:
         self.b6 = Button(canvas, text="<", command=self.back,
                          height=2, width=7)
         self.b6.place(x=w-200, y=425+10)
+        self.b6.config(state=tk.DISABLED)
 
         self.b7 = Button(canvas, text=">", command=self.next,
                          height=2, width=7)
         self.b7.place(x=w-102, y=425+10)
+        self.b7.config(state=tk.DISABLED)
         
         canvas.bind("<Button-1>", self.noted)
 
@@ -504,27 +505,13 @@ class OpeningCreator:
 
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
+                    self.b6.config(state=tk.NORMAL)
+                    
                     # zaznacenie tahu
-                    with open(self.file, 'r') as f:
-                        lines = f.readlines()
-
-                    if lines == []:
-                        lines.append(self.position + " ")
-
-                    elif len(lines) == self.variant:
-                        lines.append(self.position + " ")
-
-                    elif lines[self.variant][-1] == "\n":
-                        lines[self.variant] = lines[self.variant][:-1] + self.position + " \n"
-                        
-                    elif lines[self.variant][-1] != "\n":
-                        lines[self.variant] += self.position + " "
-                        
-                    with open(self.file, 'w') as f:
-                        f.writelines(lines)
+                    self.notation.append(self.position)
                     
                     # vykreslenie tahu
-                    self.update_board()
+                    self.board.push_san(self.position)
                     draw_board(True, create_chess_array(self.board))
 
                     self.update_scroll_list()
@@ -532,26 +519,44 @@ class OpeningCreator:
                 pass
 
     def update_scroll_list(self):
-        if self.mylist:
-            self.mylist.destroy()
+        self.b1.config(state=tk.DISABLED)
+        self.b2.config(state=tk.NORMAL)
+
+        if self.moveList:
+            self.moveList.destroy()
         else:
-            self.varlist.destroy()
+            self.varList.destroy()
 
-        self.mylist = Listbox(window, font=10)
-        chess_line = self.read_specific_line(self.file, self.variant)
+        self.moveList = Listbox(window, font=10)
 
-        for i in range(0, len(chess_line), 2):
-            if len(chess_line) != i+1:
-                self.mylist.insert(END, str(i-(i//2)+1) + ". " + str(chess_line[i]) + "     " + str(chess_line[i+1]))
+        for i in range(0, len(self.notation), 2):
+            if len(self.notation) != i+1:
+                self.moveList.insert(END, str(i-(i//2)+1) + ". " + str(self.notation[i]) + "     " + str(self.notation[i+1]))
             else:
-                self.mylist.insert(END, str(i-(i//2)+1) + ". " + str(chess_line[i]))
+                self.moveList.insert(END, str(i-(i//2)+1) + ". " + str(self.notation[i]))
         
-        self.mylist.place(x=w-200, y=40, height=200, width=157)
+        self.moveList.place(x=w-200, y=40, height=200, width=157)
     
     def update_variant_list(self):
-        pass
+        self.b1.config(state=tk.NORMAL)
+        self.b2.config(state=tk.DISABLED)
 
-    def update_board(self):
+        if self.varList:
+            self.varList.destroy()
+        else:
+            self.moveList.destroy()
+        
+        self.varList = Listbox(window, font=10)
+
+        with open(self.file, "r") as f:
+            lines = f.readlines()
+        
+        for i in range(len(lines)):
+            self.varList.insert(END, lines[i][:lines[i].index("##")])
+
+        self.varList.place(x=w-200, y=40, height=200, width=157)
+
+    def load_board(self):
         self.board = chess.Board()
         chess_line = self.read_specific_line(self.file, self.variant)
         #print(chess_line)
@@ -566,53 +571,76 @@ class OpeningCreator:
             return lines[line_number].split()
         except:
             return ""
-    
+
+
     def save(self):
-        pass
-
-    def new_variant(self):
-        with open(self.file, "a") as f:
-            print("", end="\n", file=f)
+        name = self.name_variant.get()
         
-        with open(self.file, "r") as f:
-            num = len(f.readlines())
+        if name != "":
+            # formatovanie z Listu do str
+            note = ""
+            for i in range(len(self.notation)):
+                note += self.notation[i] + " "
 
-        self.variant = num
-        self.update_board()
-        draw_board(True, create_chess_array(self.board))
+            with open(self.file, "r") as f:
+                lines = f.readlines()
 
-    def delete(self):
-        with open(self.file, "r") as f:
-            lines = f.readlines()
-
-        if lines[self.variant] != 0:
-            if lines[self.variant][-1] == "\n":
-                lines[self.variant] = lines[self.variant][:-6] + "\n"
-            else:
-                lines[self.variant] = lines[self.variant][:-5]
+            lines.append(name + "##" + note + "\n")
 
             with open(self.file, "w") as f:
                 f.writelines(lines)
-            
-            self.update_board()
-            draw_board(True, create_chess_array(self.board))
-            self.update_scroll_list()
+
+            self.update_variant_list()
+
+            # da entry do povodneho stavu
+            self.e.delete(0, tk.END)
+            self.e.config(bg="white")
+        else:
+            self.e.config(bg="lightcoral")
+
+    def reset(self):
+        self.putback = 0
+        self.position = "...."
+        self.board = chess.Board()
+        self.notation = []
+
+        self.b6.config(state=tk.DISABLED)
+        self.b7.config(state=tk.DISABLED)
+
+        self.update_scroll_list()
+        draw_board(True, create_chess_array(self.board))
+
+    def delete(self):
+        self.notation.pop()
+        self.board.pop()
+        draw_board(True, create_chess_array(self.board))
+        self.update_scroll_list()
 
     def back(self):
-        if self.putback < len(self.read_specific_line(self.file, self.variant)):
+        if self.putback < len(self.notation):
             self.putback += 1
-            self.update_board()
+            self.board.pop()
             draw_board(True, create_chess_array(self.board))
+            self.b7.config(state=tk.NORMAL)
+
+            if self.putback == len(self.notation):
+                self.b6.config(state=tk.DISABLED)
 
     def next(self):
         if self.putback > 0:
+            self.board.push_san(self.notation[-self.putback])
             self.putback -= 1
-            self.update_board()
             draw_board(True, create_chess_array(self.board))
+            self.b6.config(state=tk.NORMAL)
+
+            if self.putback == 0:
+                self.b7.config(state=tk.DISABLED)
+
 
     def end(self):
         clean_canvas([self.bm, self.b1, self.b2, self.b3, self.b4, self.b5, 
-                      self.b5, self.b6, self.b7, self.mylist, self.e])
+                      self.b5, self.b6, self.b7, self.moveList, self.varList,
+                      self.e])
         OpeningLearnerMenu()
     
 
