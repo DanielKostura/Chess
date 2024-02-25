@@ -7,6 +7,7 @@ import chess
 
 def draw_board(pieces: bool, board: list[list[str]]=[[""]], 
                bonus_x=0, bonus_y=0):
+    canvas.delete("all")
     for row in range(8):
         for column in range(8):
             if (row + column) % 2 == 1:
@@ -450,6 +451,7 @@ class OpeningCreator:
         self.variant = 0
         self.putback = 0
         self.file = file + ".txt"
+        self.name_variant = tk.StringVar()
 
         # vytvorenie subora
         f = open(self.file, "w")
@@ -464,28 +466,44 @@ class OpeningCreator:
         
         # Scroll list
         self.mylist = Listbox(window, font=10)
-        self.mylist.place(x=w-200, y=40, height=200, width=157)
+        self.mylist.place(x=w-200, y=40, height=190, width=157)
 
         # OpeningCreator buttons
+        self.b1 = Button(canvas, text="Zápis", command=self.update_scroll_list,
+                         height=1, width=5)
+        self.b1.place(x=w-200, y=18)
+
+        self.b2 = Button(canvas, text="Varinty", command=self.update_variant_list,
+                         height=1, width=6)
+        self.b2.place(x=w-156, y=18)
+
+        self.e = Entry(canvas, textvariable=self.name_variant,
+                       bg="lightgrey", width=17)
+        self.e.place(x=w-200, y=243)
+
+        self.b3 = Button(canvas, text="Uložiť", command=self.save,
+                         height=1, width=5)
+        self.b3.place(x=w-88, y=239)
+
         self.bm = Button(canvas, text="Menu", command=self.end,
                          height=2, width=21)
-        self.bm.place(x=w-200, y=260)
+        self.bm.place(x=w-200, y=260+10)
 
-        self.b1 = Button(canvas, text="Nový variant", command=self.new_variant,
+        self.b4 = Button(canvas, text="Nový variant", command=self.new_variant,
                          height=2, width=21)
-        self.b1.place(x=w-200, y=315)
+        self.b4.place(x=w-200, y=315+10)
 
-        self.b2 = Button(canvas, text="Vymaž", command=self.delete,
+        self.b5 = Button(canvas, text="Vymaž", command=self.delete,
                          height=2, width=21)
-        self.b2.place(x=w-200, y=370)
+        self.b5.place(x=w-200, y=370+10)
 
-        self.b3 = Button(canvas, text="<", command=self.back,
+        self.b6 = Button(canvas, text="<", command=self.back,
                          height=2, width=7)
-        self.b3.place(x=w-200, y=425)
+        self.b6.place(x=w-200, y=425+10)
 
-        self.b4 = Button(canvas, text=">", command=self.next,
+        self.b7 = Button(canvas, text=">", command=self.next,
                          height=2, width=7)
-        self.b4.place(x=w-102, y=425)
+        self.b7.place(x=w-102, y=425+10)
         
         canvas.bind("<Button-1>", self.noted)
 
@@ -531,7 +549,11 @@ class OpeningCreator:
                 pass
 
     def update_scroll_list(self):
-        self.mylist.destroy()
+        if self.mylist:
+            self.mylist.destroy()
+        else:
+            self.varlist.destroy()
+
         self.mylist = Listbox(window, font=10)
         chess_line = self.read_specific_line(self.file, self.variant)
 
@@ -542,6 +564,9 @@ class OpeningCreator:
                 self.mylist.insert(END, str(i-(i//2)+1) + ". " + str(chess_line[i]))
         
         self.mylist.place(x=w-200, y=40, height=200, width=157)
+    
+    def update_variant_list(self):
+        pass
 
     def update_board(self):
         self.board = chess.Board()
@@ -558,7 +583,10 @@ class OpeningCreator:
             return lines[line_number].split()
         except:
             return ""
-        
+    
+    def save(self):
+        pass
+
     def new_variant(self):
         with open(self.file, "a") as f:
             print("", end="\n", file=f)
@@ -574,14 +602,18 @@ class OpeningCreator:
         with open(self.file, "r") as f:
             lines = f.readlines()
 
-        lines[self.variant] = lines[self.variant][:-5] + "\n"
+        if lines[self.variant] != 0:
+            if lines[self.variant][-1] == "\n":
+                lines[self.variant] = lines[self.variant][:-6] + "\n"
+            else:
+                lines[self.variant] = lines[self.variant][:-5]
 
-        with open(self.file, "w") as f:
-            f.writelines(lines)
-        
-        self.update_board()
-        draw_board(True, create_chess_array(self.board))
-        self.update_scroll_list()
+            with open(self.file, "w") as f:
+                f.writelines(lines)
+            
+            self.update_board()
+            draw_board(True, create_chess_array(self.board))
+            self.update_scroll_list()
 
     def back(self):
         if self.putback < len(self.read_specific_line(self.file, self.variant)):
