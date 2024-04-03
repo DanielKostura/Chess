@@ -803,9 +803,7 @@ class OpeningLearner:
         self.bs.place(x=w-160-15, y=h-50)
         
         # názov variantu
-        self.l1 = Label(canvas, text = self.names[0],
-                       font=('Helvetica','30','bold'))
-        self.l1.place(x = 48, y = 5)
+        self.title()
 
         canvas.mainloop()
 
@@ -813,11 +811,17 @@ class OpeningLearner:
         self.bs.destroy()
 
         draw_board(True, create_chess_array(self.board), 0, 50)
+        self.title()
 
         # button MENU
         self.bm = Button(canvas, text="Menu", command=self.end,
                          height=2, width=20)
         self.bm.place(x=25, y=h-50)
+
+        # button NEXT
+        self.bn = Button(canvas, text="Ďalej", command=self.next,
+                         height=2, width=20)
+        self.bn.place(x=w-175, y=h-50)
 
         # urcovanie suradnic
         canvas.bind("<Button-1>", self.on_click)
@@ -835,40 +839,52 @@ class OpeningLearner:
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     # spravny tah
-                    if self.position == self.moves[self.variant][self.turn] and len(self.moves[self.variant]) >= self.turn:
+                    if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                         self.board.push_san(self.position)
                         draw_board(True, create_chess_array(self.board), 0, 50) # nevykresli sa
+                        self.title()
                         self.turn += 1
                         self.correct()
                     else:
                         self.wrong()
             except:
                 pass
-            
-            """if len(self.moves[self.variant]) == self.turn:
-                self.variant += 1
-                self.turn = 0
-                self.board = chess.Board()
-                canvas.after(1000, draw_board(True, create_chess_array(self.board), 0, 50))    
-    """
+    
+    def title(self):
+        canvas.create_text(w//2, 35, text=self.names[self.variant],
+                           font=('Helvetica','30','bold'))
+
+    def next(self):
+        if len(self.moves)-1 == self.variant and self.turn == len(self.moves[self.variant]):
+            self.end()
+
+        elif self.turn == len(self.moves[self.variant]):
+            self.board = chess.Board()
+            draw_board(True, create_chess_array(self.board), 0, 50)
+
+            self.turn = 0
+            self.variant += 1
+            self.title()
+            self.correct()
+            print(self.moves[self.variant][self.turn])
+
+        else:
+            self.wrong()
 
     def correct(self):
-        self.l2 = Label(canvas, text="Správne", font=('Helvetica','23','bold'), 
+        self.l1 = Label(canvas, text="Správne", font=('Helvetica','23','bold'), 
                         bg="lightgreen")
-        self.l2.place(x=60*3+10, y=h-50)
-        self.l2.after(500, self.poof)
+        self.l1.place(x=60*3+10, y=h-50)
+        self.l1.after(500, self.l1.destroy)
 
     def wrong(self):
         self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','23','bold'), 
                         bg="firebrick2")
         self.l2.place(x=60*3+10, y=h-50)
-        self.l2.after(500, self.poof)
-
-    def poof(self):
-        self.l2.destroy()
+        self.l2.after(500, self.l2.destroy)
 
     def end(self):
-        clean_canvas([self.bm, self.l1])
+        clean_canvas([self.bm, self.bn])
         OpeningLearnerMenu()
 
 class OpeningReviewer:
