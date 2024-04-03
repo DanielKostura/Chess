@@ -82,90 +82,90 @@ def create_chess_array(board, reverse = False):
     return board_rows
 
 def piece_move(x, y, fun):
-        if 10 < x < 60*8 + 10 and 60 < y < 60*9:
-            file = chr(ord('a') + (x - 10) // 60)
-            rank = str(8 - (y - 60) // 60)
+    if 10 < x < 60*8 + 10 and 60 < y < 60*9:
+        file = chr(ord('a') + (x - 10) // 60)
+        rank = str(8 - (y - 60) // 60)
 
-            fun.position += file + rank
-            fun.position = fun.position[2:]
+        fun.position += file + rank
+        fun.position = fun.position[2:]
 
-            try:
-                if chess.Move.from_uci(fun.position) in fun.board.legal_moves:
-                    # urobenie tahu
-                    fun.board.push_san(fun.position)
+        try:
+            if chess.Move.from_uci(fun.position) in fun.board.legal_moves:
+                # urobenie tahu
+                fun.board.push_san(fun.position)
 
-                    # zapinanie hodiniek
-                    if fun.board.turn == chess.WHITE:
-                        white_timer.start_timer()
-                        black_timer.stop_timer()
-                    else:
-                        black_timer.start_timer()
-                        white_timer.stop_timer()
-
-                    # vykreslenie tahu
-                    draw_board(True, create_chess_array(fun.board), 0, 50)
-
-            except:
-                pass
-
-            if fun.board.is_checkmate() == True:
-                white_timer.stop_timer()
-                black_timer.stop_timer()
-                canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
-                                        fill="lightgrey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                   (60 * 8 + 20 + 100)//2,
-                                    text="VÝHRA",
-                                    font=('Helvetica','50','bold'))
-                if Game.board.turn == chess.BLACK:
-                    canvas.create_text((60 * 8 + 20)//2, 
-                                       (60 * 8 + 20 + 100)//2+40,
-                                        text="Biely vyhral šachmatom",
-                                        font=('Helvetica','15','bold'))
+                # zapinanie hodiniek
+                if fun.board.turn == chess.WHITE:
+                    white_timer.start_timer()
+                    black_timer.stop_timer()
                 else:
-                    canvas.create_text((60 * 8 + 20)//2, 
-                                       (60 * 8 + 20 + 100)//2+40,
-                                        text="Čierny vyhral šachmatom",
-                                        font=('Helvetica','15','bold'))
-            elif fun.board.is_stalemate() == True:
-                white_timer.stop_timer()
-                black_timer.stop_timer()
-                canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
-                                        fill="grey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                   (60 * 8 + 20 + 100)//2,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
+                    black_timer.start_timer()
+                    white_timer.stop_timer()
+
+                # vykreslenie tahu
+                draw_board(True, create_chess_array(fun.board), 0, 50)
+
+        except:
+            pass
+
+        if fun.board.is_checkmate() == True:
+            white_timer.stop_timer()
+            black_timer.stop_timer()
+            canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                    fill="lightgrey", outline="black")
+            canvas.create_text((60 * 8 + 20)//2-5, 
+                                (60 * 8 + 20 + 100)//2,
+                                text="VÝHRA",
+                                font=('Helvetica','50','bold'))
+            if Game.board.turn == chess.BLACK:
                 canvas.create_text((60 * 8 + 20)//2, 
-                                   (60 * 8 + 20 + 100)//2+40,
-                                    text="Patová situácia",
+                                    (60 * 8 + 20 + 100)//2+40,
+                                    text="Biely vyhral šachmatom",
                                     font=('Helvetica','15','bold'))
-            elif fun.board.is_insufficient_material() == True:
-                white_timer.stop_timer()
-                black_timer.stop_timer()
-                canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
-                                        fill="lightgrey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                   (60 * 8 + 20 + 100)//2,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
+            else:
                 canvas.create_text((60 * 8 + 20)//2, 
-                                   (60 * 8 + 20 + 100)//2+40,
-                                    text="Nedostatok materiálu",
+                                    (60 * 8 + 20 + 100)//2+40,
+                                    text="Čierny vyhral šachmatom",
                                     font=('Helvetica','15','bold'))
-            elif fun.board.can_claim_threefold_repetition() == True:
-                white_timer.stop_timer()
-                black_timer.stop_timer()
-                canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
-                                        fill="lightgrey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2, 
-                                   (60 * 8 + 20 + 100)//2-5,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
-                canvas.create_text((60 * 8 + 20)//2, 
-                                   (60 * 8 + 20 + 100)//2+40,
-                                    text="Opakovanie ťahou",
-                                    font=('Helvetica','15','bold'))
+        elif fun.board.is_stalemate() == True:
+            white_timer.stop_timer()
+            black_timer.stop_timer()
+            canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
+                                    fill="grey", outline="black")
+            canvas.create_text((60 * 8 + 20)//2-5, 
+                                (60 * 8 + 20 + 100)//2,
+                                text="REMÍZA",
+                                font=('Helvetica','50','bold'))
+            canvas.create_text((60 * 8 + 20)//2, 
+                                (60 * 8 + 20 + 100)//2+40,
+                                text="Patová situácia",
+                                font=('Helvetica','15','bold'))
+        elif fun.board.is_insufficient_material() == True:
+            white_timer.stop_timer()
+            black_timer.stop_timer()
+            canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                    fill="lightgrey", outline="black")
+            canvas.create_text((60 * 8 + 20)//2-5, 
+                                (60 * 8 + 20 + 100)//2,
+                                text="REMÍZA",
+                                font=('Helvetica','50','bold'))
+            canvas.create_text((60 * 8 + 20)//2, 
+                                (60 * 8 + 20 + 100)//2+40,
+                                text="Nedostatok materiálu",
+                                font=('Helvetica','15','bold'))
+        elif fun.board.can_claim_threefold_repetition() == True:
+            white_timer.stop_timer()
+            black_timer.stop_timer()
+            canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
+                                    fill="lightgrey", outline="black")
+            canvas.create_text((60 * 8 + 20)//2, 
+                                (60 * 8 + 20 + 100)//2-5,
+                                text="REMÍZA",
+                                font=('Helvetica','50','bold'))
+            canvas.create_text((60 * 8 + 20)//2, 
+                                (60 * 8 + 20 + 100)//2+40,
+                                text="Opakovanie ťahou",
+                                font=('Helvetica','15','bold'))
 
 def clean_canvas(pole):
     # Delete all objects on the canvas
@@ -777,48 +777,98 @@ class OpeningLearner:
         canvas.config(width=w, height=h, bg='white')
 
         # premenné pre funkciu piece_move
-        Game.position = "...."
-        Game.board = chess.Board()
-        Game.white_on_turn = True
+        self.position = "...."
+        self.board = chess.Board()
+        self.white_on_turn = True
+
+        # ostatne premenne
+        self.variant = 0
+        self.turn = 0
+
+        with open(self.file, "r") as f: # ziskanie info o otvoreni
+            self.lines = f.readlines()
+        
+        self.names = []
+        self.moves = []
+        for i in range(len(self.lines)):
+            self.names.append(self.lines[i][:self.lines[i].index("##")])
+            self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
 
         # vykreslenie sachovnice
         draw_board(False, [[""]], 0, 50)
 
         # button START
-        self.b1 = Button(canvas, text="START", command=self.opening_start,
+        self.bs = Button(canvas, text="START", command=self.opening_start,
                height=2, width=20)
-        self.b1.place(x=w-160-15, y=h-50)
-
-        # zistovanie informacii o otvoreni
-        with open(self.file, "r") as f:
-            lines = f.readlines()
+        self.bs.place(x=w-160-15, y=h-50)
         
         # názov variantu
-        canvas.create_text(w//2, 30, text=lines[0][:lines[0].index("##")],
-                           font=('Helvetica','30','bold'))
+        self.l1 = Label(canvas, text = self.names[0],
+                       font=('Helvetica','30','bold'))
+        self.l1.place(x = 48, y = 5)
 
         canvas.mainloop()
 
     def opening_start(self):
-        self.b1.destroy()
+        self.bs.destroy()
 
-        draw_board(True, create_chess_array(Game.board), 0, 50)
+        draw_board(True, create_chess_array(self.board), 0, 50)
 
         # button MENU
         self.bm = Button(canvas, text="Menu", command=self.end,
                          height=2, width=20)
-        self.bm.place(x=w-160-15, y=h-50)
+        self.bm.place(x=25, y=h-50)
 
         # urcovanie suradnic
         canvas.bind("<Button-1>", self.on_click)
     
-    def on_click(self, action):
+    def on_click(self, action): # uprav
         x = action.x
         y = action.y
-        draw_board(True, create_chess_array(chess.Board(), True))
-             
+        if 10 < x < 60*8 + 10 and 50 < y < 60*8+50:
+            file = chr(ord('a') + (x - 10) // 60)
+            rank = str(8 - (y - 50) // 60)
+            
+            self.position += file + rank
+            self.position = self.position[2:]
+            
+            try:
+                if chess.Move.from_uci(self.position) in self.board.legal_moves:
+                    # spravny tah
+                    if self.position == self.moves[self.variant][self.turn] and len(self.moves[self.variant]) >= self.turn:
+                        self.board.push_san(self.position)
+                        draw_board(True, create_chess_array(self.board), 0, 50) # nevykresli sa
+                        self.turn += 1
+                        self.correct()
+                    else:
+                        self.wrong()
+            except:
+                pass
+            
+            """if len(self.moves[self.variant]) == self.turn:
+                self.variant += 1
+                self.turn = 0
+                self.board = chess.Board()
+                canvas.after(1000, draw_board(True, create_chess_array(self.board), 0, 50))    
+    """
+
+    def correct(self):
+        self.l2 = Label(canvas, text="Správne", font=('Helvetica','23','bold'), 
+                        bg="lightgreen")
+        self.l2.place(x=60*3+10, y=h-50)
+        self.l2.after(500, self.poof)
+
+    def wrong(self):
+        self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','23','bold'), 
+                        bg="firebrick2")
+        self.l2.place(x=60*3+10, y=h-50)
+        self.l2.after(500, self.poof)
+
+    def poof(self):
+        self.l2.destroy()
+
     def end(self):
-        clean_canvas([self.bm])
+        clean_canvas([self.bm, self.l1])
         OpeningLearnerMenu()
 
 class OpeningReviewer:
