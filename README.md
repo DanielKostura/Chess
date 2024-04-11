@@ -13,3 +13,6 @@ NEFUNGUJE
 2. funkcia delete v classe OpeningCreator obcas nevymazuje dobre
 
 TREBA DOKONCIT
+1. v OpeningLearneri kde sa vypise Spravne a nespravne
+2. pridat hint
+3. ked mam nejaky tah nespravne tak nech sa mi zopakuje

@@ -694,7 +694,6 @@ class OpeningCreator:
         except:
             return ""
 
-
     def save(self):
         name = self.name_variant.get()
         
@@ -768,6 +767,10 @@ class OpeningCreator:
 class OpeningLearner:
     def __init__(self, file) -> None:
         self.file = file
+
+class OpeningReviewer:
+    def __init__(self, file) -> None:
+        self.file = file
         window.title(self.file[:-4])
 
         # vytvorenie noveho platna
@@ -826,7 +829,7 @@ class OpeningLearner:
         # urcovanie suradnic
         canvas.bind("<Button-1>", self.on_click)
     
-    def on_click(self, action): # uprav
+    def on_click(self, action): 
         x = action.x
         y = action.y
         if 10 < x < 60*8 + 10 and 50 < y < 60*8+50:
@@ -878,18 +881,14 @@ class OpeningLearner:
         self.l1.after(500, self.l1.destroy)
 
     def wrong(self):
-        self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','23','bold'), 
+        self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','18','bold'), 
                         bg="firebrick2")
-        self.l2.place(x=60*3+10, y=h-50)
+        self.l2.place(x=60*3+10, y=h-47)
         self.l2.after(500, self.l2.destroy)
 
     def end(self):
         clean_canvas([self.bm, self.bn])
         OpeningLearnerMenu()
-
-class OpeningReviewer:
-    def __init__(self, file) -> None:
-        self.file = file
 
 window = tk.Tk()
 window.title("Menu")
