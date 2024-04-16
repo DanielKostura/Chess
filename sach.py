@@ -1,6 +1,7 @@
 from tkinter import *
 import tkinter as tk
 import os
+import time
 # import typing
 import chess
 # pip install chess
@@ -681,7 +682,6 @@ class OpeningCreator:
     def load_board(self):
         self.board = chess.Board()
         chess_line = self.read_specific_line(self.file, self.variant)
-        #print(chess_line)
 
         for i in range(len(chess_line)-self.putback):
             self.board.push_san(chess_line[i])
@@ -757,7 +757,6 @@ class OpeningCreator:
             if self.putback == 0:
                 self.b7.config(state=tk.DISABLED)
 
-
     def end(self):
         clean_canvas([self.bm, self.b1, self.b2, self.b3, self.b4, self.b5, 
                       self.b5, self.b6, self.b7, self.moveList, self.varList,
@@ -769,7 +768,7 @@ class OpeningLearner:
         self.file = file
 
 class OpeningReviewer:
-    def __init__(self, file) -> None:
+    def __init__(self, file, line = 0) -> None:
         self.file = file
         window.title(self.file[:-4])
 
@@ -787,6 +786,10 @@ class OpeningReviewer:
         # ostatne premenne
         self.variant = 0
         self.turn = 0
+
+        self.actual_misstake = 0
+        self.misstakes = []
+        self.correcting_misstakes = False
 
         with open(self.file, "r") as f: # ziskanie info o otvoreni
             self.lines = f.readlines()
@@ -842,14 +845,32 @@ class OpeningReviewer:
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     # spravny tah
-                    if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
-                        self.board.push_san(self.position)
-                        draw_board(True, create_chess_array(self.board), 0, 50) # nevykresli sa
-                        self.title()
-                        self.turn += 1
-                        self.correct()
-                    else:
-                        self.wrong()
+                    if self.correcting_misstakes == False:
+                        if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
+                            self.board.push_san(self.position)
+                            draw_board(True, create_chess_array(self.board), 0, 50)
+                            self.title()
+                            self.turn += 1
+                            self.correct()
+                        else:
+                            self.wrong()
+
+                    elif self.correcting_misstakes:
+                        if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
+                            self.board.push_san(self.position)
+                            draw_board(True, create_chess_array(self.board), 0, 50)
+                            self.title()
+                            self.correct()
+
+                            canvas.after(500, self.handle_correct_move)
+
+                        else:
+                            self.board.push_san(self.position)
+                            draw_board(True, create_chess_array(self.board), 0, 50)
+                            self.title()
+                            self.wrong()
+
+                            canvas.after(500, self.handle_wrong_move)
             except:
                 pass
     
@@ -857,8 +878,59 @@ class OpeningReviewer:
         canvas.create_text(w//2, 35, text=self.names[self.variant],
                            font=('Helvetica','30','bold'))
 
+    def handle_correct_move(self):
+        self.fixed[self.actual_misstake] += 1
+
+        if self.fixed[self.actual_misstake] == 3:
+            self.misstakes.pop(self.actual_misstake)
+            self.fixed.pop(self.actual_misstake)
+
+            if self.misstakes == [] and len(self.moves) > self.variant:
+                self.correcting_misstakes = False
+                self.board = chess.Board()
+                draw_board(True, create_chess_array(self.board), 0, 50)
+
+                self.turn = 0
+                self.variant += 1
+                self.title()  
+
+            elif len(self.moves)-1 == self.variant:
+                self.end()
+
+        if self.actual_misstake+1 == len(self.misstakes):
+            self.actual_misstake = 0
+            self.load_board(self.misstakes[self.actual_misstake])
+        elif self.actual_misstake+1 < len(self.misstakes):
+            self.actual_misstake += 1
+            self.load_board(self.misstakes[self.actual_misstake])
+
+    def handle_wrong_move(self):
+        self.fixed[self.actual_misstake] = 0
+
+        if self.actual_misstake+1 != len(self.misstakes):
+            self.load_board(self.misstakes[self.actual_misstake+1])
+        else:
+            self.actual_misstake = 0
+            self.load_board(self.misstakes[self.actual_misstake])
+
     def next(self):
-        if len(self.moves)-1 == self.variant and self.turn == len(self.moves[self.variant]):
+        # self.correcting_misstakes == True
+        if self.misstakes != [] and self.turn == len(self.moves[self.variant]) and self.correcting_misstakes == False:
+            self.correcting_misstakes = True
+            self.fixed = [0] * len(self.misstakes)
+            self.load_board(self.misstakes[0])
+            self.correct()
+
+        elif self.correcting_misstakes and self.turn == len(self.moves[self.variant]):
+            self.handle_correct_move()
+            self.correct()
+        
+        elif self.correcting_misstakes and self.turn != len(self.moves[self.variant]):
+            self.handle_wrong_move()
+            self.wrong()
+
+        # self.correcting_misstakes == False
+        elif len(self.moves)-1 == self.variant and self.turn == len(self.moves[self.variant]):
             self.end()
 
         elif self.turn == len(self.moves[self.variant]):
@@ -869,7 +941,6 @@ class OpeningReviewer:
             self.variant += 1
             self.title()
             self.correct()
-            print(self.moves[self.variant][self.turn])
 
         else:
             self.wrong()
@@ -884,12 +955,23 @@ class OpeningReviewer:
         self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','18','bold'), 
                         bg="firebrick2")
         self.l2.place(x=60*3+10, y=h-47)
+        if self.turn not in self.misstakes:
+            self.misstakes.append(self.turn)
         self.l2.after(500, self.l2.destroy)
 
     def end(self):
         clean_canvas([self.bm, self.bn])
         OpeningLearnerMenu()
 
+    def load_board(self, n):
+        self.board = chess.Board()
+        self.turn = n
+        for i in range(n):
+            self.board.push_san(self.moves[self.variant][i])
+            
+        draw_board(True, create_chess_array(self.board), 0, 50)
+        self.title()
+            
 window = tk.Tk()
 window.title("Menu")
 
