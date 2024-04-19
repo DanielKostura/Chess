@@ -766,6 +766,118 @@ class OpeningCreator:
 class OpeningLearner:
     def __init__(self, file) -> None:
         self.file = file
+        window.title(self.file[:-4])
+
+        # vytvorenie noveho platna
+        global w, h
+        w = 60 * 8 + 20
+        h = 60 * 8 + 20 + 100
+        canvas.config(width=w, height=h, bg='white')
+
+        # premenné pre funkciu piece_move
+        self.position = "...."
+        self.board = chess.Board()
+        self.white_on_turn = True
+
+        # ostatne premenne
+        self.variant = 0
+        self.turn = 0
+
+        with open(self.file, "r") as f: # ziskanie info o otvoreni
+            self.lines = f.readlines()
+        
+        self.names = []
+        self.moves = []
+        for i in range(len(self.lines)):
+            self.names.append(self.lines[i][:self.lines[i].index("##")])
+            self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
+
+        # vykreslenie sachovnice
+        draw_board(False, [[""]], 0, 50)
+
+        # button START
+        self.bs = Button(canvas, text="START", command=self.opening_start,
+               height=2, width=20)
+        self.bs.place(x=w-160-15, y=h-50)
+        
+        # button MENU
+        self.bm = Button(canvas, text="Menu", command=self.end,
+                         height=2, width=20)
+        self.bm.place(x=25, y=h-50)
+
+        # názov variantu
+        self.title()
+
+        canvas.mainloop()
+
+    def opening_start(self):
+        self.bs.destroy()
+
+        draw_board(True, create_chess_array(self.board), 0, 50)
+        self.title()
+
+        # urcovanie suradnic
+        canvas.bind("<Button-1>", self.on_click)
+    
+    def title(self):
+        canvas.create_text(w//2, 35, text=self.names[self.variant],
+                           font=('Helvetica','30','bold'))
+    
+    def on_click(self, action): 
+        x = action.x
+        y = action.y
+        if 10 < x < 60*8 + 10 and 50 < y < 60*8+50:
+            file = chr(ord('a') + (x - 10) // 60)
+            rank = str(8 - (y - 50) // 60)
+            
+            self.position += file + rank
+            self.position = self.position[2:]
+            
+            try:
+                if chess.Move.from_uci(self.position) in self.board.legal_moves:
+                    # spravny tah
+                    if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
+                        self.board.push_san(self.position)
+                        draw_board(True, create_chess_array(self.board), 0, 50)
+                        self.title()
+                        self.turn += 1
+                        self.correct()
+                        if len(self.moves[self.variant]) == self.turn:
+                            self.variant += 1
+                            self.turn = 0
+                            canvas.after(500, self.next_board)
+                    else:
+                        self.wrong()
+            except:
+                pass
+
+    def correct(self):
+        self.l1 = Label(canvas, text="Správne", font=('Helvetica','23','bold'), 
+                        bg="lightgreen")
+        self.l1.place(x=60*3+10, y=h-50)
+        self.l1.after(500, self.l1.destroy)
+
+    def wrong(self):
+        self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','18','bold'), 
+                        bg="firebrick2")
+        self.l2.place(x=60*3+10, y=h-47)
+        self.l2.after(500, self.l2.destroy)
+
+    def next_board(self):
+        if len(self.moves) > self.variant:
+            self.board = chess.Board()
+            draw_board(True, create_chess_array(self.board), 0, 50)
+            self.title()
+            print(len(self.moves), ">", self.variant)
+        else:
+            self.end()
+    
+    def end(self):
+        if self.bs:
+            clean_canvas([self.bm, self.bs])
+        else:
+            clean_canvas([self.bm])
+        OpeningLearnerMenu()
 
 class OpeningReviewer:
     def __init__(self, file, line = 0) -> None:
@@ -808,6 +920,11 @@ class OpeningReviewer:
                height=2, width=20)
         self.bs.place(x=w-160-15, y=h-50)
         
+        # button MENU
+        self.bm = Button(canvas, text="Menu", command=self.end,
+                         height=2, width=20)
+        self.bm.place(x=25, y=h-50)
+
         # názov variantu
         self.title()
 
@@ -818,11 +935,6 @@ class OpeningReviewer:
 
         draw_board(True, create_chess_array(self.board), 0, 50)
         self.title()
-
-        # button MENU
-        self.bm = Button(canvas, text="Menu", command=self.end,
-                         height=2, width=20)
-        self.bm.place(x=25, y=h-50)
 
         # button NEXT
         self.bn = Button(canvas, text="Ďalej", command=self.next,
@@ -913,6 +1025,15 @@ class OpeningReviewer:
             self.actual_misstake = 0
             self.load_board(self.misstakes[self.actual_misstake])
 
+    def load_board(self, n):
+        self.board = chess.Board()
+        self.turn = n
+        for i in range(n):
+            self.board.push_san(self.moves[self.variant][i])
+            
+        draw_board(True, create_chess_array(self.board), 0, 50)
+        self.title()
+        
     def next(self):
         # self.correcting_misstakes == True
         if self.misstakes != [] and self.turn == len(self.moves[self.variant]) and self.correcting_misstakes == False:
@@ -960,17 +1081,12 @@ class OpeningReviewer:
         self.l2.after(500, self.l2.destroy)
 
     def end(self):
-        clean_canvas([self.bm, self.bn])
+        if self.bs:
+            clean_canvas([self.bm, self.bs])
+        else:
+            clean_canvas([self.bm, self.bn])
         OpeningLearnerMenu()
 
-    def load_board(self, n):
-        self.board = chess.Board()
-        self.turn = n
-        for i in range(n):
-            self.board.push_san(self.moves[self.variant][i])
-            
-        draw_board(True, create_chess_array(self.board), 0, 50)
-        self.title()
             
 window = tk.Tk()
 window.title("Menu")
