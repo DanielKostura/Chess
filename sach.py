@@ -815,6 +815,7 @@ class OpeningLearner:
 
         draw_board(True, create_chess_array(self.board), 0, 50)
         self.title()
+        canvas.after(750, self.next_move)
 
         # urcovanie suradnic
         canvas.bind("<Button-1>", self.on_click)
@@ -845,7 +846,8 @@ class OpeningLearner:
                         if len(self.moves[self.variant]) == self.turn:
                             self.variant += 1
                             self.turn = 0
-                            canvas.after(500, self.next_board)
+                            canvas.after(750, self.next_variant)
+                        self.next_move()
                     else:
                         self.wrong()
             except:
@@ -863,15 +865,26 @@ class OpeningLearner:
         self.l2.place(x=60*3+10, y=h-47)
         self.l2.after(500, self.l2.destroy)
 
-    def next_board(self):
+    def next_variant(self):
         if len(self.moves) > self.variant:
             self.board = chess.Board()
             draw_board(True, create_chess_array(self.board), 0, 50)
             self.title()
-            print(len(self.moves), ">", self.variant)
+            self.next_move()
         else:
             self.end()
     
+    def next_move(self):
+        self.board.push_san(self.moves[self.variant][self.turn])
+        draw_board(True, create_chess_array(self.board), 0, 50)
+        self.title()
+        canvas.after(1000, self.one_move_back)
+
+    def one_move_back(self):
+        self.board.pop()
+        draw_board(True, create_chess_array(self.board), 0, 50)
+        self.title()
+
     def end(self):
         if self.bs:
             clean_canvas([self.bm, self.bs])
@@ -1087,7 +1100,7 @@ class OpeningReviewer:
             clean_canvas([self.bm, self.bn])
         OpeningLearnerMenu()
 
-            
+         
 window = tk.Tk()
 window.title("Menu")
 
