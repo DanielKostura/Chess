@@ -9,6 +9,8 @@ import chess
 
 def draw_board(pieces: bool, board: list[list[str]]=[[""]],
                bonus_x=0, bonus_y=0):
+    if board != [[""]]:
+        board = create_chess_array(board)
     canvas.delete("all")
 
     for row in range(8):
@@ -165,24 +167,27 @@ class GameMenu:
         canvas.mainloop()
 
     def blitz(self):
-        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
+        self.end()
         Game(1*60, 0)
 
     def blitz_bonus(self):
-        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
+        self.end()
         Game(1*60, 1)
 
     def rapid(self):
-        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
+        self.end()
         Game(10*60, 0)
     
     def rapid_bonus(self):
-        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
+        self.end()
         Game(10*60, 3)
 
     def menu(self):
-        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
+        self.end()
         Menu()
+    
+    def end(self):
+        clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
 
 class OpeningLearnerMenu:
     def __init__(self) -> None:
@@ -335,7 +340,7 @@ class Game:
     def game_start(self):
         self.b1.destroy()
 
-        draw_board(True, create_chess_array(Game.board), 0, 50)
+        draw_board(True, self.board, 0, 50)
 
         # button MENU
         self.bm = Button(canvas, text="Menu", command=self.game_end,
@@ -376,7 +381,7 @@ class Game:
                         white_timer.stop_timer()
 
                     # vykreslenie tahu
-                    draw_board(True, create_chess_array(self.board), 0, 50)
+                    draw_board(True, self.board, 0, 50)
 
             except:
                 pass
@@ -390,7 +395,7 @@ class Game:
                                     (60 * 8 + 20 + 100)//2,
                                     text="VÝHRA",
                                     font=('Helvetica','50','bold'))
-                if Game.board.turn == chess.BLACK:
+                if self.board.turn == chess.BLACK:
                     canvas.create_text((60 * 8 + 20)//2, 
                                         (60 * 8 + 20 + 100)//2+40,
                                         text="Biely vyhral šachmatom",
@@ -473,7 +478,7 @@ class Timer:
             canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                          fill="lightgrey", outline="black")
             
-            if Game.board.can_claim_draw():
+            if self.board.can_claim_draw():
                 canvas.create_text((60 * 8 + 20)//2-5, 
                                    (60 * 8 + 20 + 100)//2,
                                     text="REMÍZA",
@@ -487,7 +492,7 @@ class Timer:
                                    (60 * 8 + 20 + 100)//2,
                                     text="VÝHRA",
                                     font=('Helvetica','50','bold'))
-                if Game.board.turn == chess.BLACK:
+                if self.board.turn == chess.BLACK:
                     canvas.create_text((60 * 8 + 20)//2, 
                                        (60 * 8 + 20 + 100)//2+40,
                                         text="biely vyhral - nedostatok času",
@@ -520,7 +525,7 @@ class OpeningCreator:
         self.board = chess.Board()
 
         # vykreslenie sachovnice
-        draw_board(True, create_chess_array(chess.Board()))
+        draw_board(True, chess.Board())
         
         # Scroll lists
         self.moveList = Listbox(window, font=10)
@@ -592,7 +597,7 @@ class OpeningCreator:
                     
                     # vykreslenie tahu
                     self.board.push_san(self.position)
-                    draw_board(True, create_chess_array(self.board))
+                    draw_board(True, self.board)
 
                     self.update_scroll_list()
             except:
@@ -615,7 +620,7 @@ class OpeningCreator:
                 for i in range(len(self.notation)):
                     self.board.push_san(self.notation[i])
 
-                draw_board(True, create_chess_array(self.board))
+                draw_board(True, self.board)
 
     def delete_varList(self, action):
         # Získajte index položky, na ktorú ste klikli
@@ -727,19 +732,19 @@ class OpeningCreator:
         self.b7.config(state=tk.DISABLED)
 
         self.update_scroll_list()
-        draw_board(True, create_chess_array(self.board))
+        draw_board(True, self.board)
 
     def delete(self):
         self.notation.pop()
         self.board.pop()
-        draw_board(True, create_chess_array(self.board))
+        draw_board(True, self.board)
         self.update_scroll_list()
 
     def back(self):
         if self.putback < len(self.notation):
             self.putback += 1
             self.board.pop()
-            draw_board(True, create_chess_array(self.board))
+            draw_board(True, self.board)
             self.b7.config(state=tk.NORMAL)
 
             if self.putback == len(self.notation):
@@ -749,7 +754,7 @@ class OpeningCreator:
         if self.putback > 0:
             self.board.push_san(self.notation[-self.putback])
             self.putback -= 1
-            draw_board(True, create_chess_array(self.board))
+            draw_board(True, self.board)
             self.b6.config(state=tk.NORMAL)
 
             if self.putback == 0:
@@ -811,7 +816,7 @@ class OpeningLearner:
     def opening_start(self):
         self.bs.destroy()
 
-        draw_board(True, create_chess_array(self.board), 0, 50)
+        draw_board(True, self.board, 0, 50)
         self.title()
         canvas.after(750, self.next_move)
 
@@ -842,7 +847,7 @@ class OpeningLearner:
                     # spravny tah
                     if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                         self.board.push_san(self.position)
-                        draw_board(True, create_chess_array(self.board), 0, 50)
+                        draw_board(True, self.board, 0, 50)
                         self.title()
                         self.turn += 1
                         self.correct()
@@ -872,7 +877,7 @@ class OpeningLearner:
     def next_variant(self):
         if len(self.moves) > self.variant:
             self.board = chess.Board()
-            draw_board(True, create_chess_array(self.board), 0, 50)
+            draw_board(True, self.board, 0, 50)
             self.title()
             self.next_move()
         else:
@@ -882,7 +887,7 @@ class OpeningLearner:
         # try - kvoli viac nasobným stlacaniam self.bn
         try:
             self.board.push_san(self.moves[self.variant][self.turn])
-            draw_board(True, create_chess_array(self.board), 0, 50)
+            draw_board(True, self.board, 0, 50)
             self.title()
             canvas.after(1000, self.one_move_back)
         except:
@@ -890,7 +895,7 @@ class OpeningLearner:
 
     def one_move_back(self):
         self.board.pop()
-        draw_board(True, create_chess_array(self.board), 0, 50)
+        draw_board(True, self.board, 0, 50)
         self.title()
 
     def end(self):
@@ -954,7 +959,7 @@ class OpeningReviewer:
     def opening_start(self):
         self.bs.destroy()
 
-        draw_board(True, create_chess_array(self.board), 0, 50)
+        draw_board(True, self.board, 0, 50)
         self.title()
 
         # button NEXT
@@ -981,7 +986,7 @@ class OpeningReviewer:
                     if self.correcting_misstakes == False:
                         if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
-                            draw_board(True, create_chess_array(self.board), 0, 50)
+                            draw_board(True, self.board, 0, 50)
                             self.title()
                             self.turn += 1
                             self.correct()
@@ -991,7 +996,7 @@ class OpeningReviewer:
                     elif self.correcting_misstakes:
                         if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
-                            draw_board(True, create_chess_array(self.board), 0, 50)
+                            draw_board(True, self.board, 0, 50)
                             self.title()
                             self.correct()
 
@@ -999,7 +1004,7 @@ class OpeningReviewer:
 
                         else:
                             self.board.push_san(self.position)
-                            draw_board(True, create_chess_array(self.board), 0, 50)
+                            draw_board(True, self.board, 0, 50)
                             self.title()
                             self.wrong()
 
@@ -1021,7 +1026,7 @@ class OpeningReviewer:
             if self.misstakes == [] and len(self.moves) > self.variant:
                 self.correcting_misstakes = False
                 self.board = chess.Board()
-                draw_board(True, create_chess_array(self.board), 0, 50)
+                draw_board(True, self.board, 0, 50)
 
                 self.turn = 0
                 self.variant += 1
@@ -1052,7 +1057,7 @@ class OpeningReviewer:
         for i in range(n):
             self.board.push_san(self.moves[self.variant][i])
             
-        draw_board(True, create_chess_array(self.board), 0, 50)
+        draw_board(True, self.board, 0, 50)
         self.title()
         
     def next(self):
@@ -1077,7 +1082,7 @@ class OpeningReviewer:
 
         elif self.turn == len(self.moves[self.variant]):
             self.board = chess.Board()
-            draw_board(True, create_chess_array(self.board), 0, 50)
+            draw_board(True, self.board, 0, 50)
 
             self.turn = 0
             self.variant += 1
