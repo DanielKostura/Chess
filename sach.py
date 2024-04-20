@@ -774,7 +774,7 @@ class OpeningLearner:
         h = 60 * 8 + 20 + 100
         canvas.config(width=w, height=h, bg='white')
 
-        # premenné pre funkciu piece_move
+        # premenné pre funkciu on_click
         self.position = "...."
         self.board = chess.Board()
         self.white_on_turn = True
@@ -817,6 +817,11 @@ class OpeningLearner:
         self.title()
         canvas.after(750, self.next_move)
 
+        # button rada
+        self.bh = Button(canvas, text="Zopakuj", command=self.next_move,
+                         height=2, width=20)
+        self.bh.place(x=w-175, y=h-50)
+
         # urcovanie suradnic
         canvas.bind("<Button-1>", self.on_click)
     
@@ -847,7 +852,8 @@ class OpeningLearner:
                             self.variant += 1
                             self.turn = 0
                             canvas.after(750, self.next_variant)
-                        self.next_move()
+                            return
+                        canvas.after(750, self.next_move)
                     else:
                         self.wrong()
             except:
@@ -875,10 +881,14 @@ class OpeningLearner:
             self.end()
     
     def next_move(self):
-        self.board.push_san(self.moves[self.variant][self.turn])
-        draw_board(True, create_chess_array(self.board), 0, 50)
-        self.title()
-        canvas.after(1000, self.one_move_back)
+        # try - kvoli viac nasobným stlacaniam self.bn
+        try:
+            self.board.push_san(self.moves[self.variant][self.turn])
+            draw_board(True, create_chess_array(self.board), 0, 50)
+            self.title()
+            canvas.after(1000, self.one_move_back)
+        except:
+            pass
 
     def one_move_back(self):
         self.board.pop()
@@ -889,7 +899,7 @@ class OpeningLearner:
         if self.bs:
             clean_canvas([self.bm, self.bs])
         else:
-            clean_canvas([self.bm])
+            clean_canvas([self.bm, self.bh])
         OpeningLearnerMenu()
 
 class OpeningReviewer:
@@ -903,7 +913,7 @@ class OpeningReviewer:
         h = 60 * 8 + 20 + 100
         canvas.config(width=w, height=h, bg='white')
 
-        # premenné pre funkciu piece_move
+        # premenné pre funkciu on_click
         self.position = "...."
         self.board = chess.Board()
         self.white_on_turn = True
