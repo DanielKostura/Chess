@@ -1,8 +1,6 @@
 from tkinter import *
 import tkinter as tk
 import os
-import time
-# import typing
 import chess
 # pip install chess
 # python -m pip install chess
@@ -100,7 +98,7 @@ class Menu:
         window.title("Menu")
 
         # menu buttons
-        self.b1 = Button(canvas, text = "Hra s priaťelom",
+        self.b1 = Button(canvas, text = "Hra s priateľom",
                         command=self.gameMenu, height= 3, width=28)
         self.b1.place(x = 60*8+2*20, y = 40)
 
@@ -108,7 +106,7 @@ class Menu:
                          command=self.openingLearnerMenu, height= 3, width=28)
         self.b2.place(x = 60*8+2*20, y = 40+75)
 
-        self.b3 = Button(canvas, text = "Pravidlá", command=self.rules, height= 3,
+        self.b3 = Button(canvas, text = "Koniec", command=self.destroy, height= 3,
                         width=28)
         self.b3.place(x = 60*8+2*20, y = 420)
         
@@ -118,25 +116,19 @@ class Menu:
         canvas.mainloop()
 
     def gameMenu(self):
-        clean_canvas([self.b1, self.b2, self.b3])
+        self.end()
         GameMenu()
 
     def openingLearnerMenu(self):
-        clean_canvas([self.b1, self.b2, self.b3])
+        self.end()
         OpeningLearnerMenu()
+    
+    def end(self):
+        clean_canvas([self.b1, self.b2, self.b3])
 
-    def rules(self):
-        self.window.destroy()
-        rules_window = Tk()  # Vytvořte nové okno
-        rules_window.title('Pravidlá šachu')
-
-        W = 500
-        H = 500
-        p = Canvas(width=W, height=H,bg='white')
-        p.pack()
-
-        p.create_text(W//2, 30, text = "DDD", fill="black")
-
+    def destroy(self):
+        window.destroy()
+        
 class GameMenu:
     def __init__(self) -> None:
         window.title('Menu')
@@ -509,7 +501,7 @@ class Timer:
             self.formated_time.set(self.format_time())
             canvas.after_cancel(self.active_timer)
 
-
+  
 class OpeningCreator:
     def __init__(self, file) -> None:
         self.variant = 0
@@ -539,7 +531,7 @@ class OpeningCreator:
         self.b1.place(x=w-200, y=18)
         self.b1.config(state=tk.DISABLED)
 
-        self.b2 = Button(canvas, text="Varinty", command=self.update_variant_list,
+        self.b2 = Button(canvas, text="Varianty", command=self.update_variant_list,
                          height=1, width=6)
         self.b2.place(x=w-156, y=18)
 
