@@ -613,6 +613,10 @@ class OpeningCreator:
 
                 draw_board(self.board)
 
+        self.putback = 0
+        self.b6.config(state=tk.NORMAL)
+        self.b7.config(state=tk.DISABLED)
+
     def delete_varList(self, action):
         # Získajte index položky, na ktorú ste klikli
         index = self.varList.nearest(action.y)
