@@ -5,9 +5,8 @@ import chess
 # pip install chess
 # python -m pip install chess
 
-def draw_board(pieces: bool, board: list[list[str]]=[[""]],
-               bonus_x=0, bonus_y=0):
-    if board != [[""]]:
+def draw_board(board=None, bonus_x=10, bonus_y=10):
+    if board != None:
         board = create_chess_array(board)
     canvas.delete("all")
 
@@ -18,12 +17,12 @@ def draw_board(pieces: bool, board: list[list[str]]=[[""]],
             else:
                 farba = "white"
 
-            x = column*60+10+bonus_x
-            y = row*60+10+bonus_y
+            x = column*60+bonus_x
+            y = row*60+bonus_y
             canvas.create_rectangle(x, y, x+60, y+60,
                                     fill=farba, outline='black',width='5')
     
-            if pieces == True:
+            if board != None:
                 canvas.create_text(x+30, y+30, text=board[row][column],
                                            font=('Helvetica','50','bold'))
 
@@ -36,16 +35,16 @@ def create_chess_array(board, reverse = False):
                 current_piece = board.piece_at(chess.square(7-j, i))
             elif reverse == True:
                 current_piece = board.piece_at(chess.square(j, 7-i))
-            # empty squere
+            # Empty squere
             current_piece = current_piece.symbol() if current_piece else ''
 
-            # pawns
+            # Pawns
             if current_piece == "p":
                 piece_symbol = "♟"
             elif current_piece == "P":
                 piece_symbol = "♙"
             
-            # rooks
+            # Rooks
             elif current_piece == "r":
                 piece_symbol = "♜"
             elif current_piece == "R":
@@ -83,10 +82,10 @@ def create_chess_array(board, reverse = False):
     return board_rows
 
 def clean_canvas(pole):
-    # Delete all objects on the canvas
+    # Vymaže všetky objekty na canvase
     canvas.delete("all")
         
-    # Destroy or remove buttons, labels, and entries
+    # Odstráni buttons, labels a entries
     for widget in pole:
         widget.destroy()
 
@@ -110,8 +109,8 @@ class Menu:
                         width=28)
         self.b3.place(x = 60*8+2*20, y = 420)
         
-        # vykreslenie sachovnice
-        draw_board(False)
+        # Vykreslenie šachovnice
+        draw_board()
         
         canvas.mainloop()
 
@@ -153,8 +152,8 @@ class GameMenu:
                          height= 3, width=28)
         self.bm.place(x = 60*8+2*20, y = 420)
         
-        # vykreslenie sachovnice
-        draw_board(False)
+        # Vykreslenie šachovnice
+        draw_board()
 
         canvas.mainloop()
 
@@ -224,8 +223,8 @@ class OpeningLearnerMenu:
         # Scroll list
         self.scroll_list()
 
-        # vykreslenie sachovnice
-        draw_board(False)
+        # Vykreslenie šachovnice
+        draw_board()
 
         canvas.mainloop()
     
@@ -265,7 +264,7 @@ class OpeningLearnerMenu:
     def new_opening(self):
         name = self.filemane.get()
         
-        # vytvorenie/vycistenie suborov
+        # Vytvorenie/Vyčistenie súbora
         f = open(name + ".txt", "w")
         f.close()
 
@@ -320,11 +319,11 @@ class Game:
         self.white_on_turn = True
         
         # vykreslenie sachovnice
-        draw_board(False, [[""]], 0, 50)
+        draw_board(None, 10, 60)
 
         # button START
         self.b1 = Button(canvas, text="START", command=self.game_start,
-               height=2, width=20)
+               height=2, width=20) 
         self.b1.place(x=w-160-15, y=h-50)
 
         canvas.mainloop()
@@ -332,7 +331,7 @@ class Game:
     def game_start(self):
         self.b1.destroy()
 
-        draw_board(True, self.board, 0, 50)
+        draw_board(self.board, 10, 60)
 
         # button MENU
         self.bm = Button(canvas, text="Menu", command=self.game_end,
@@ -373,7 +372,7 @@ class Game:
                         white_timer.stop_timer()
 
                     # vykreslenie tahu
-                    draw_board(True, self.board, 0, 50)
+                    draw_board(self.board, 10, 60)
 
             except:
                 pass
@@ -517,7 +516,7 @@ class OpeningCreator:
         self.board = chess.Board()
 
         # vykreslenie sachovnice
-        draw_board(True, chess.Board())
+        draw_board(chess.Board())
         
         # Scroll lists
         self.moveList = Listbox(window, font=10)
@@ -589,7 +588,7 @@ class OpeningCreator:
                     
                     # vykreslenie tahu
                     self.board.push_san(self.position)
-                    draw_board(True, self.board)
+                    draw_board(self.board)
 
                     self.update_scroll_list()
             except:
@@ -612,7 +611,7 @@ class OpeningCreator:
                 for i in range(len(self.notation)):
                     self.board.push_san(self.notation[i])
 
-                draw_board(True, self.board)
+                draw_board(self.board)
 
     def delete_varList(self, action):
         # Získajte index položky, na ktorú ste klikli
@@ -724,19 +723,19 @@ class OpeningCreator:
         self.b7.config(state=tk.DISABLED)
 
         self.update_scroll_list()
-        draw_board(True, self.board)
+        draw_board(self.board)
 
     def delete(self):
         self.notation.pop()
         self.board.pop()
-        draw_board(True, self.board)
+        draw_board(self.board)
         self.update_scroll_list()
 
     def back(self):
         if self.putback < len(self.notation):
             self.putback += 1
             self.board.pop()
-            draw_board(True, self.board)
+            draw_board(self.board)
             self.b7.config(state=tk.NORMAL)
 
             if self.putback == len(self.notation):
@@ -746,7 +745,7 @@ class OpeningCreator:
         if self.putback > 0:
             self.board.push_san(self.notation[-self.putback])
             self.putback -= 1
-            draw_board(True, self.board)
+            draw_board(self.board)
             self.b6.config(state=tk.NORMAL)
 
             if self.putback == 0:
@@ -788,7 +787,7 @@ class OpeningLearner:
             self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
 
         # vykreslenie sachovnice
-        draw_board(False, [[""]], 0, 50)
+        draw_board(None, 10, 60)
 
         # button START
         self.bs = Button(canvas, text="START", command=self.opening_start,
@@ -808,7 +807,7 @@ class OpeningLearner:
     def opening_start(self):
         self.bs.destroy()
 
-        draw_board(True, self.board, 0, 50)
+        draw_board(self.board, 10, 60)
         self.title()
         canvas.after(750, self.next_move)
 
@@ -839,7 +838,7 @@ class OpeningLearner:
                     # spravny tah
                     if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                         self.board.push_san(self.position)
-                        draw_board(True, self.board, 0, 50)
+                        draw_board(self.board, 10, 60)
                         self.title()
                         self.turn += 1
                         self.correct()
@@ -869,7 +868,7 @@ class OpeningLearner:
     def next_variant(self):
         if len(self.moves) > self.variant:
             self.board = chess.Board()
-            draw_board(True, self.board, 0, 50)
+            draw_board(self.board, 10, 60)
             self.title()
             self.next_move()
         else:
@@ -879,7 +878,7 @@ class OpeningLearner:
         # try - kvoli viac nasobným stlacaniam self.bn
         try:
             self.board.push_san(self.moves[self.variant][self.turn])
-            draw_board(True, self.board, 0, 50)
+            draw_board(self.board, 10, 60)
             self.title()
             canvas.after(1000, self.one_move_back)
         except:
@@ -887,7 +886,7 @@ class OpeningLearner:
 
     def one_move_back(self):
         self.board.pop()
-        draw_board(True, self.board, 0, 50)
+        draw_board(self.board, 10, 60)
         self.title()
 
     def end(self):
@@ -931,7 +930,7 @@ class OpeningReviewer:
             self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
 
         # vykreslenie sachovnice
-        draw_board(False, [[""]], 0, 50)
+        draw_board(None, 10, 60)
 
         # button START
         self.bs = Button(canvas, text="START", command=self.opening_start,
@@ -951,7 +950,7 @@ class OpeningReviewer:
     def opening_start(self):
         self.bs.destroy()
 
-        draw_board(True, self.board, 0, 50)
+        draw_board(self.board, 10, 60)
         self.title()
 
         # button NEXT
@@ -978,7 +977,7 @@ class OpeningReviewer:
                     if self.correcting_misstakes == False:
                         if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
-                            draw_board(True, self.board, 0, 50)
+                            draw_board(self.board, 10, 60)
                             self.title()
                             self.turn += 1
                             self.correct()
@@ -988,7 +987,7 @@ class OpeningReviewer:
                     elif self.correcting_misstakes:
                         if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
-                            draw_board(True, self.board, 0, 50)
+                            draw_board(self.board, 10, 60)
                             self.title()
                             self.correct()
 
@@ -996,7 +995,7 @@ class OpeningReviewer:
 
                         else:
                             self.board.push_san(self.position)
-                            draw_board(True, self.board, 0, 50)
+                            draw_board(self.board, 10, 60)
                             self.title()
                             self.wrong()
 
@@ -1018,7 +1017,7 @@ class OpeningReviewer:
             if self.misstakes == [] and len(self.moves) > self.variant:
                 self.correcting_misstakes = False
                 self.board = chess.Board()
-                draw_board(True, self.board, 0, 50)
+                draw_board(self.board, 10, 60)
 
                 self.turn = 0
                 self.variant += 1
@@ -1049,7 +1048,7 @@ class OpeningReviewer:
         for i in range(n):
             self.board.push_san(self.moves[self.variant][i])
             
-        draw_board(True, self.board, 0, 50)
+        draw_board(self.board, 10, 60)
         self.title()
         
     def next(self):
@@ -1074,7 +1073,7 @@ class OpeningReviewer:
 
         elif self.turn == len(self.moves[self.variant]):
             self.board = chess.Board()
-            draw_board(True, self.board, 0, 50)
+            draw_board(self.board, 10, 60)
 
             self.turn = 0
             self.variant += 1
