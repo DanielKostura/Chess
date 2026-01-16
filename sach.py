@@ -82,10 +82,10 @@ def create_chess_array(board, reverse = False):
     return board_rows
 
 def clean_canvas(pole):
-    # Vymaže všetky objekty na canvase
+    # Deletes all objects on the canvas
     canvas.delete("all")
         
-    # Odstráni buttons, labels a entries
+    # Removes buttons, labels and entries
     for widget in pole:
         widget.destroy()
 
@@ -96,7 +96,7 @@ class Menu:
         canvas.config(width=w, height=h, bg='white')
         window.title("Menu")
 
-        # menu buttons
+        # Menu buttons
         self.b1 = Button(canvas, text = "Hra s priateľom",
                         command=self.gameMenu, height= 3, width=28)
         self.b1.place(x = 60*8+2*20, y = 40)
@@ -109,7 +109,7 @@ class Menu:
                         width=28)
         self.b3.place(x = 60*8+2*20, y = 420)
         
-        # Vykreslenie šachovnice
+        # Chessboard rendering
         draw_board()
         
         canvas.mainloop()
@@ -131,7 +131,7 @@ class Menu:
 class GameMenu:
     def __init__(self) -> None:
         window.title('Menu')
-        # menu buttons
+        # Menu buttons
         self.b1 = Button(canvas, text = "1 + 0", command=self.blitz,
                          height= 3, width=28)
         self.b1.place(x = 60*8+2*20, y = 40)
@@ -152,7 +152,7 @@ class GameMenu:
                          height= 3, width=28)
         self.bm.place(x = 60*8+2*20, y = 420)
         
-        # Vykreslenie šachovnice
+        # Chessboard rendering
         draw_board()
 
         canvas.mainloop()
@@ -223,15 +223,15 @@ class OpeningLearnerMenu:
         # Scroll list
         self.scroll_list()
 
-        # Vykreslenie šachovnice
+        # Chessboard rendering
         draw_board()
 
         canvas.mainloop()
     
     def selection_in_scroll_list(self, action):
-        # Získajte index položky, na ktorú ste klikli
+        # Getting the index of the item you clicked on
         index = self.openingList.nearest(action.y)
-        # Získajte text položky, na ktorú ste klikli
+        # Getting the text of the item you clicked on
         selected_item = self.openingList.get(index)
 
         clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4, self.bm, self.openingList])
@@ -246,14 +246,14 @@ class OpeningLearnerMenu:
     def scroll_list(self):
         self.openingList = Listbox(window, font=10, selectmode="browse")
 
-        # Získajte aktuálny adresár
+        # Getting the current directory
         current_directory = os.getcwd()
-        # Získajte zoznam všetkých súborov v aktuálnom adresári
+        # Getting a list of all files in the current directory
         files = os.listdir(current_directory)
         
-        # Iterujte každý súbor v adresári
+        # Iterate through each file in a directory
         for file in files:
-            # Skontrolujte, či je súbor súborom .txt
+            # Check if the file is a .txt file
             if file.endswith(".txt"):
                 self.openingList.insert(END, file[:-4])
 
@@ -264,7 +264,7 @@ class OpeningLearnerMenu:
     def new_opening(self):
         name = self.filemane.get()
         
-        # Vytvorenie/Vyčistenie súbora
+        # Create/Clean File
         f = open(name + ".txt", "w")
         f.close()
 
@@ -304,24 +304,24 @@ class Game:
     def __init__(self, time, bonus) -> None:
         window.title('Hra s priteľom')
 
-        # vytvorenie noveho platna
+        # Rendering new canvas
         global w, h
         w = 60 * 8 + 20
         h = 60 * 8 + 20 + 100
         canvas.config(width=w, height=h, bg='white')
-        
+
         self.time = time
         self.bonus = bonus
 
-        # premenné pre funkciu piece_move
+        # Variables for piece_move function
         self.position = "...."
         self.board = chess.Board()
         self.white_on_turn = True
         
-        # vykreslenie sachovnice
+        # Chessboard rendering
         draw_board(None, 10, 60)
 
-        # button START
+        # Button START
         self.b1 = Button(canvas, text="START", command=self.game_start,
                height=2, width=20) 
         self.b1.place(x=w-160-15, y=h-50)
@@ -333,19 +333,19 @@ class Game:
 
         draw_board(self.board, 10, 60)
 
-        # button MENU
+        # Button MENU
         self.bm = Button(canvas, text="Menu", command=self.game_end,
                          height=2, width=20)
         self.bm.place(x=w-160-15, y=h-50)
 
-        # timers
+        # Timers
         global black_timer, white_timer
         black_timer = Timer(self.time, self.bonus, 10+15, 10)
         white_timer = Timer(self.time, self.bonus, 10+15, h-50)
 
         white_timer.start_timer()
 
-        # urcovanie suradnic
+        # Determining coordinates
         canvas.bind("<Button-1>", self.on_click)
 
     def on_click(self, action):
@@ -360,10 +360,10 @@ class Game:
 
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
-                    # urobenie tahu
+                    # Making a move
                     self.board.push_san(self.position)
 
-                    # zapinanie hodiniek
+                    # Timer changes
                     if self.board.turn == chess.WHITE:
                         white_timer.start_timer()
                         black_timer.stop_timer()
@@ -371,7 +371,7 @@ class Game:
                         black_timer.start_timer()
                         white_timer.stop_timer()
 
-                    # vykreslenie tahu
+                    # Chessboard rendering
                     draw_board(self.board, 10, 60)
 
             except:
@@ -511,11 +511,11 @@ class OpeningCreator:
 
         window.title('Vytváranie otvorenia')
 
-        # premenné pre funkciu on_click
+        # Variables for on_click function
         self.position = "...."
         self.board = chess.Board()
 
-        # vykreslenie sachovnice
+        # Chessboard rendering
         draw_board(chess.Board())
         
         # Scroll lists
@@ -564,7 +564,7 @@ class OpeningCreator:
         self.b7.place(x=w-102, y=425+10)
         self.b7.config(state=tk.DISABLED)
         
-        # action
+        # Action
         canvas.bind("<Button-1>", self.on_click)
 
         canvas.mainloop()
@@ -583,10 +583,10 @@ class OpeningCreator:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     self.b6.config(state=tk.NORMAL)
                     
-                    # zaznacenie tahu
+                    # Noting move
                     self.notation.append(self.position)
                     
-                    # vykreslenie tahu
+                    # Chessboard/move rendering
                     self.board.push_san(self.position)
                     draw_board(self.board)
 
@@ -595,9 +595,9 @@ class OpeningCreator:
                 pass
 
     def open_varList(self, action):
-        # Získajte index položky, na ktorú ste klikli
+        # Get the index of the item you clicked on
         index = self.varList.nearest(action.y)
-        # Získajte text položky, na ktorú ste klikli
+        # Get the text of the item you clicked on
         selected_item = self.varList.get(index)
 
         with open(self.file, "r") as f:
@@ -618,9 +618,9 @@ class OpeningCreator:
         self.b7.config(state=tk.DISABLED)
 
     def delete_varList(self, action):
-        # Získajte index položky, na ktorú ste klikli
+        # Get the index of the item you clicked on
         index = self.varList.nearest(action.y)
-        # Získajte text položky, na ktorú ste klikli
+        # Get the text of the item you clicked on
         selected_item = self.varList.get(index)
 
         with open(self.file, "r") as f:
@@ -689,7 +689,7 @@ class OpeningCreator:
         name = self.name_variant.get()
         
         if name != "":
-            # formátovanie z Listu do str
+            # formating from Listu to str
             note = ""
             for i in range(len(self.notation)):
                 note += self.notation[i] + " "
@@ -704,7 +704,7 @@ class OpeningCreator:
 
             self.update_variant_list()
 
-            # dá entry do pôvodného stavu
+            # Will return the entry to its original state
             self.e.delete(0, tk.END)
             self.e.config(bg="white")
         else:
@@ -759,22 +759,23 @@ class OpeningLearner:
         self.file = file
         window.title(self.file[:-4])
 
-        # Vytvorenie nového platna
+        # Creating a new canvas
         global w, h
         w = 60 * 8 + 20
         h = 60 * 8 + 20 + 100
         canvas.config(width=w, height=h, bg='white')
 
-        # Premenné pre funkciu on_click
+        # Variables for the on_click function
         self.position = "...."
         self.board = chess.Board()
         self.white_on_turn = True
 
-        # Ostatne premenné
+        # Other variables
         self.variant = 0
         self.turn = 0
 
-        with open(self.file, "r") as f: # Získanie info o otvorení
+        # Getting info about opening
+        with open(self.file, "r") as f:
             self.lines = f.readlines()
         
         self.names = []
@@ -783,7 +784,7 @@ class OpeningLearner:
             self.names.append(self.lines[i][:self.lines[i].index("##")])
             self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
 
-        # Vykreslenie šachovnice
+        # Chessboard rendering
         draw_board(None, 10, 60)
 
         # Button START
@@ -791,12 +792,12 @@ class OpeningLearner:
                height=2, width=20)
         self.bs.place(x=w-160-15, y=h-50)
         
-        # button MENU
+        # Button MENU
         self.bm = Button(canvas, text="Menu", command=self.end,
                          height=2, width=20)
         self.bm.place(x=25, y=h-50)
 
-        # Názov variantu
+        # Variant name
         self.title()
 
         canvas.mainloop()
@@ -808,12 +809,12 @@ class OpeningLearner:
         self.title()
         canvas.after(750, self.next_move)
 
-        # Button rada
+        # Button hint
         self.bh = Button(canvas, text="Zopakuj", command=self.next_move,
                          height=2, width=20)
         self.bh.place(x=w-175, y=h-50)
 
-        # Určovanie súradníc
+        # Determining coordinates
         canvas.bind("<Button-1>", self.on_click)
     
     def title(self):
@@ -832,7 +833,7 @@ class OpeningLearner:
             
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
-                    # Správny ťah
+                    # Correct move
                     if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                         self.board.push_san(self.position)
                         draw_board(self.board, 10, 60)
@@ -872,7 +873,7 @@ class OpeningLearner:
             self.end()
     
     def next_move(self):
-        # try - kvôli viac násobným stlačaniam self.bn
+        # try - due to multiple presses of self.bn
         try:
             self.board.push_san(self.moves[self.variant][self.turn])
             draw_board(self.board, 10, 60)
@@ -898,18 +899,18 @@ class OpeningReviewer:
         self.file = file
         window.title(self.file[:-4])
 
-        # Vytvorenie nového platna
+        # Creating a new canvas
         global w, h
         w = 60 * 8 + 20
         h = 60 * 8 + 20 + 100
         canvas.config(width=w, height=h, bg='white')
 
-        # Premenné pre funkciu on_click
+        # Variables for the on_click function
         self.position = "...."
         self.board = chess.Board()
         self.white_on_turn = True
 
-        # Ostatné premenné
+        # Other variables
         self.variant = 0
         self.turn = 0
 
@@ -917,7 +918,7 @@ class OpeningReviewer:
         self.misstakes = []
         self.correcting_misstakes = False
 
-        # Získanie info o otvorení
+        # Getting info about opening
         with open(self.file, "r") as f:
             self.lines = f.readlines()
         
@@ -927,7 +928,7 @@ class OpeningReviewer:
             self.names.append(self.lines[i][:self.lines[i].index("##")])
             self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
 
-        # Vykreslenie šachovnice
+        # Chessboard rendering
         draw_board(None, 10, 60)
 
         # Button START
@@ -940,7 +941,7 @@ class OpeningReviewer:
                          height=2, width=20)
         self.bm.place(x=25, y=h-50)
 
-        # Názov variantu
+        # Variant name
         self.title()
 
         canvas.mainloop()
@@ -956,7 +957,7 @@ class OpeningReviewer:
                          height=2, width=20)
         self.bn.place(x=w-175, y=h-50)
 
-        # Určovanie súradníc
+        # Determining coordinates
         canvas.bind("<Button-1>", self.on_click)
     
     def on_click(self, action): 
@@ -971,7 +972,7 @@ class OpeningReviewer:
             
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
-                    # správny ťah
+                    # Correct move
                     if self.correcting_misstakes == False:
                         if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
@@ -1102,7 +1103,7 @@ class OpeningReviewer:
             clean_canvas([self.bm, self.bn])
         OpeningLearnerMenu()
 
-         
+
 window = tk.Tk()
 window.title("Menu")
 
