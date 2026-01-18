@@ -1,3 +1,6 @@
+# pip install chess
+# python -m pip install chess
+
 # Chess
 FUNGUJE
 1. toto a podobne podmienky - if fun.board.is_checkmate() == True:
