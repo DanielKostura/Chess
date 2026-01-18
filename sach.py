@@ -1,12 +1,13 @@
-from tkinter import *
+from tkinter import Canvas, Label, Entry, Button, Listbox, END
 import tkinter as tk
 import os
 import chess
 # pip install chess
 # python -m pip install chess
 
+
 def draw_board(board=None, bonus_x=10, bonus_y=10):
-    if board != None:
+    if board is not None:
         board = create_chess_array(board)
     canvas.delete("all")
 
@@ -20,21 +21,24 @@ def draw_board(board=None, bonus_x=10, bonus_y=10):
             x = column*60+bonus_x
             y = row*60+bonus_y
             canvas.create_rectangle(x, y, x+60, y+60,
-                                    fill=farba, outline='black',width='5')
-    
-            if board != None:
-                canvas.create_text(x+30, y+30, text=board[row][column],
-                                           font=('Helvetica','50','bold'))
+                                    fill=farba, outline='black', width='5')
 
-def create_chess_array(board, reverse = False):
-    board_rows = []
+            if board is not None:
+                canvas.create_text(x+30, y+30, text=board[row][column],
+                                   font=('Helvetica', '50', 'bold'))
+
+
+def create_chess_array(board, reverse=False):
+    board_rows: list[list[str]] = []
     for i in reversed(range(8)):
-        row = []
+        row: list[str] = []
         for j in reversed(range(8)):
-            if reverse == False:
-                current_piece = board.piece_at(chess.square(7-j, i))
-            elif reverse == True:
-                current_piece = board.piece_at(chess.square(j, 7-i))
+            current_piece = (
+                board.piece_at(chess.square(j, 7 - i))
+                if reverse
+                else board.piece_at(chess.square(7 - j, i))
+            )
+
             # Empty squere
             current_piece = current_piece.symbol() if current_piece else ''
 
@@ -43,7 +47,7 @@ def create_chess_array(board, reverse = False):
                 piece_symbol = "♟"
             elif current_piece == "P":
                 piece_symbol = "♙"
-            
+
             # Rooks
             elif current_piece == "r":
                 piece_symbol = "♜"
@@ -55,13 +59,13 @@ def create_chess_array(board, reverse = False):
                 piece_symbol = "♞"
             elif current_piece == "N":
                 piece_symbol = "♘"
-            
+
             # Bishops
             elif current_piece == "b":
                 piece_symbol = "♝"
             elif current_piece == "B":
                 piece_symbol = "♗"
-            
+
             # Queen
             elif current_piece == "q":
                 piece_symbol = "♛"
@@ -75,19 +79,21 @@ def create_chess_array(board, reverse = False):
                 piece_symbol = "♔"
             else:
                 piece_symbol = current_piece
-            
+
             row.append(piece_symbol)
 
         board_rows.append(row)
     return board_rows
 
+
 def clean_canvas(pole):
     # Deletes all objects on the canvas
     canvas.delete("all")
-        
+
     # Removes buttons, labels and entries
     for widget in pole:
         widget.destroy()
+
 
 class Menu:
     def __init__(self) -> None:
@@ -97,61 +103,70 @@ class Menu:
         window.title("Menu")
 
         # Menu buttons
-        self.b1 = Button(canvas, text = "Hra s priateľom",
-                        command=self.gameMenu, height= 3, width=28)
-        self.b1.place(x = 60*8+2*20, y = 40)
+        self.b1 = Button(canvas, text="Hra s priateľom",
+                         command=self.game_menu, height=3, width=28)
+        self.b1.place(x=60*8+2*20, y=40)
 
-        self.b2 = Button(canvas, text = "Precvičenie otvorení",
-                         command=self.openingLearnerMenu, height= 3, width=28)
-        self.b2.place(x = 60*8+2*20, y = 40+75)
+        self.b2 = Button(canvas, text="Hra proti počítaču",
+                         command=self.bot_menu, height=3, width=28)
+        self.b2.place(x=60*8+2*20, y=40+75)
 
-        self.b3 = Button(canvas, text = "Koniec", command=self.destroy, height= 3,
-                        width=28)
-        self.b3.place(x = 60*8+2*20, y = 420)
-        
+        self.b3 = Button(canvas, text="Precvičenie otvorení",
+                         command=self.opening_learner_menu, height=3, width=28)
+        self.b3.place(x=60*8+2*20, y=40+75*2)
+
+        self.b4 = Button(canvas, text="Koniec", command=self.destroy, height=3,
+                         width=28)
+        self.b4.place(x=60*8+2*20, y=420)
+
         # Chessboard rendering
         draw_board()
-        
+
         canvas.mainloop()
 
-    def gameMenu(self):
+    def game_menu(self):
         self.end()
         GameMenu()
 
-    def openingLearnerMenu(self):
+    def opening_learner_menu(self):
         self.end()
         OpeningLearnerMenu()
-    
+
+    def bot_menu(self):
+        self.end()
+        BotMenu()
+
     def end(self):
-        clean_canvas([self.b1, self.b2, self.b3])
+        clean_canvas([self.b1, self.b2, self.b3, self.b4])
 
     def destroy(self):
         window.destroy()
-        
+
+
 class GameMenu:
     def __init__(self) -> None:
         window.title('Menu')
         # Menu buttons
-        self.b1 = Button(canvas, text = "1 + 0", command=self.blitz,
-                         height= 3, width=28)
-        self.b1.place(x = 60*8+2*20, y = 40)
+        self.b1 = Button(canvas, text="1 + 0", command=self.blitz,
+                         height=3, width=28)
+        self.b1.place(x=60*8+2*20, y=40)
 
-        self.b2 = Button(canvas, text = "1 + 1", command=self.blitz_bonus,
-                         height= 3, width=28)
-        self.b2.place(x = 60*8+2*20, y = 40+75)
+        self.b2 = Button(canvas, text="1 + 1", command=self.blitz_bonus,
+                         height=3, width=28)
+        self.b2.place(x=60*8+2*20, y=40+75)
 
-        self.b3 = Button(canvas, text = "10 + 0", command=self.rapid,
-                         height= 3, width=28)
-        self.b3.place(x = 60*8+2*20, y = 40+75*2)
+        self.b3 = Button(canvas, text="10 + 0", command=self.rapid,
+                         height=3, width=28)
+        self.b3.place(x=60*8+2*20, y=40+75*2)
 
-        self.b4 = Button(canvas, text = "10 + 3", command=self.rapid_bonus,
-                         height= 3, width=28)
-        self.b4.place(x = 60*8+2*20, y = 40+75*3)
+        self.b4 = Button(canvas, text="10 + 3", command=self.rapid_bonus,
+                         height=3, width=28)
+        self.b4.place(x=60*8+2*20, y=40+75*3)
 
-        self.bm = Button(canvas, text = "Menu", command=self.menu,
-                         height= 3, width=28)
-        self.bm.place(x = 60*8+2*20, y = 420)
-        
+        self.bm = Button(canvas, text="Menu", command=self.menu,
+                         height=3, width=28)
+        self.bm.place(x=60*8+2*20, y=420)
+
         # Chessboard rendering
         draw_board()
 
@@ -159,16 +174,16 @@ class GameMenu:
 
     def blitz(self):
         self.end()
-        Game(1*60, 0)
+        Game(60, 0)
 
     def blitz_bonus(self):
         self.end()
-        Game(1*60, 1)
+        Game(60, 1)
 
     def rapid(self):
         self.end()
         Game(10*60, 0)
-    
+
     def rapid_bonus(self):
         self.end()
         Game(10*60, 3)
@@ -176,9 +191,10 @@ class GameMenu:
     def menu(self):
         self.end()
         Menu()
-    
+
     def end(self):
         clean_canvas([self.b1, self.b2, self.b3, self.b4, self.bm])
+
 
 class OpeningLearnerMenu:
     def __init__(self) -> None:
@@ -187,38 +203,38 @@ class OpeningLearnerMenu:
         h = 60 * 8 + 20
         canvas.config(width=w, height=h, bg='white')
         window.title("Menu")
-        
+
         self.filemane = tk.StringVar()
         self.lerning = 0
-        
+
         # OpeningLearnerMenu buttons
-        self.l = Label(canvas, text = "Zadaj názov otvorenia:")
-        self.l.place(x = 60*8+2*20+40, y = 40)
+        self.l = Label(canvas, text="Zadaj názov otvorenia:")
+        self.l.place(x=60*8+2*20+40, y=40)
 
-        self.e = Entry(canvas, textvariable = self.filemane, 
-                        font=('calibre', 10, 'normal'), bg="lightgrey")
-        self.e.place(x = 60*8+2*20+30, y = 70)
+        self.e = Entry(canvas, textvariable=self.filemane,
+                       font=('calibre', 10, 'normal'), bg="lightgrey")
+        self.e.place(x=60*8+2*20+30, y=70)
 
-        self.b1 = Button(canvas, text = "Vytvoriť nové otvorenie",
-                         command=self.new_opening, height= 2, width=22)
-        self.b1.place(x = 60*8+2*20+18, y = 100)
+        self.b1 = Button(canvas, text="Vytvoriť nové otvorenie",
+                         command=self.new_opening, height=2, width=22)
+        self.b1.place(x=60*8+2*20+18, y=100)
 
-        self.b2 = Button(canvas, text = "Učenie",
-                         command=self.learn, height= 2, width=12)
-        self.b2.place(x = 60*8+2*20, y = h-110)
+        self.b2 = Button(canvas, text="Učenie",
+                         command=self.learn, height=2, width=12)
+        self.b2.place(x=60*8+2*20, y=h-110)
         self.b2.config(state=tk.DISABLED)
 
-        self.b3 = Button(canvas, text = "Precvičenie",
-                         command=self.review, height= 2, width=12)
-        self.b3.place(x = 60*8+7*20+10, y = h-110)
+        self.b3 = Button(canvas, text="Precvičenie",
+                         command=self.review, height=2, width=12)
+        self.b3.place(x=60*8+7*20+10, y=h-110)
 
-        self.b4 = Button(canvas, text = "Upraviť",
-                         command=self.update, height= 2, width=12)
-        self.b4.place(x = 60*8+2*20, y = h-60)
-   
-        self.bm = Button(canvas, text = "Menu", command=self.menu,
-                           height= 2, width=12)
-        self.bm.place(x = 60*8+7*20+10, y = h-60)
+        self.b4 = Button(canvas, text="Upraviť",
+                         command=self.update, height=2, width=12)
+        self.b4.place(x=60*8+2*20, y=h-60)
+
+        self.bm = Button(canvas, text="Menu", command=self.menu,
+                         height=2, width=12)
+        self.bm.place(x=60*8+7*20+10, y=h-60)
 
         # Scroll list
         self.scroll_list()
@@ -227,15 +243,16 @@ class OpeningLearnerMenu:
         draw_board()
 
         canvas.mainloop()
-    
+
     def selection_in_scroll_list(self, action):
         # Getting the index of the item you clicked on
-        index = self.openingList.nearest(action.y)
+        index = self.opening_list.nearest(action.y)
         # Getting the text of the item you clicked on
-        selected_item = self.openingList.get(index)
+        selected_item = self.opening_list.get(index)
 
-        clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4, self.bm, self.openingList])
-        
+        clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4,
+                      self.bm, self.opening_list])
+
         if self.lerning == 0:
             OpeningLearner(selected_item + ".txt")
         elif self.lerning == 1:
@@ -244,37 +261,38 @@ class OpeningLearnerMenu:
             OpeningCreator(selected_item)
 
     def scroll_list(self):
-        self.openingList = Listbox(window, font=10, selectmode="browse")
+        self.opening_list = Listbox(window, font=10, selectmode="browse")
 
         # Getting the current directory
         current_directory = os.getcwd()
         # Getting a list of all files in the current directory
         files = os.listdir(current_directory)
-        
+
         # Iterate through each file in a directory
         for file in files:
             # Check if the file is a .txt file
             if file.endswith(".txt"):
-                self.openingList.insert(END, file[:-4])
+                self.opening_list.insert(END, file[:-4])
 
-        self.openingList.place(x=w-230, y=155, height=230, width=204)
+        self.opening_list.place(x=w-230, y=155, height=230, width=204)
 
-        self.openingList.bind('<Button-1>', self.selection_in_scroll_list)
+        self.opening_list.bind('<Button-1>', self.selection_in_scroll_list)
 
     def new_opening(self):
         name = self.filemane.get()
-        
+
         # Create/Clean File
         f = open(name + ".txt", "w")
         f.close()
 
         if name != "":
-            clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4, self.bm, self.openingList])
+            clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4,
+                          self.bm, self.opening_list])
             OpeningCreator(name)
         else:
             canvas.create_text(w-20*2-88, 150,
-                               text="Musíte prve zadať názov otvorenia", 
-                               font=('Helvetica','10','bold'), fill="red")
+                               text="Musíte prve zadať názov otvorenia",
+                               font=('Helvetica', '10', 'bold'), fill="red")
             self.e.config(bg="lightcoral")
 
     def learn(self):
@@ -296,8 +314,13 @@ class OpeningLearnerMenu:
         self.b4.config(state=tk.DISABLED)
 
     def menu(self):
-        clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4, self.bm, self.openingList])
+        clean_canvas([self.l, self.e, self.b1, self.b2, self.b3, self.b4,
+                      self.bm, self.opening_list])
         Menu()
+
+
+class BotMenu:
+    pass
 
 
 class Game:
@@ -317,13 +340,13 @@ class Game:
         self.position = "...."
         self.board = chess.Board()
         self.white_on_turn = True
-        
+
         # Chessboard rendering
         draw_board(None, 10, 60)
 
         # Button START
         self.b1 = Button(canvas, text="START", command=self.game_start,
-               height=2, width=20) 
+                         height=2, width=20)
         self.b1.place(x=w-160-15, y=h-50)
 
         canvas.mainloop()
@@ -333,7 +356,7 @@ class Game:
 
         draw_board(self.board, 10, 60)
 
-        # Button MENU
+        # Button menu
         self.bm = Button(canvas, text="Menu", command=self.game_end,
                          height=2, width=20)
         self.bm.place(x=w-160-15, y=h-50)
@@ -351,7 +374,8 @@ class Game:
     def on_click(self, action):
         x = action.x
         y = action.y
-        if white_timer.time > 0 and black_timer.time > 0 and 10 < x < 60*8 + 10 and 60 < y < 60*9:
+        if white_timer.time > 0 and black_timer.time > 0 and \
+           10 < x < 60*8 + 10 and 60 < y < 60*9:
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 60) // 60)
 
@@ -373,72 +397,72 @@ class Game:
 
                     # Chessboard rendering
                     draw_board(self.board, 10, 60)
-
             except:
                 pass
 
-            if self.board.is_checkmate() == True:
+            if self.board.is_checkmate():
                 white_timer.stop_timer()
                 black_timer.stop_timer()
                 canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                         fill="lightgrey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                    (60 * 8 + 20 + 100)//2,
-                                    text="VÝHRA",
-                                    font=('Helvetica','50','bold'))
+                canvas.create_text((60*8+20)//2 - 5,
+                                   (60*8+20+100)//2,
+                                   text="VÝHRA",
+                                   font=('Helvetica', '50', 'bold'))
                 if self.board.turn == chess.BLACK:
-                    canvas.create_text((60 * 8 + 20)//2, 
-                                        (60 * 8 + 20 + 100)//2+40,
-                                        text="Biely vyhral šachmatom",
-                                        font=('Helvetica','15','bold'))
+                    canvas.create_text((60*8+20)//2,
+                                       (60*8+20+100)//2 + 40,
+                                       text="Biely vyhral šachmatom",
+                                       font=('Helvetica', '15', 'bold'))
                 else:
-                    canvas.create_text((60 * 8 + 20)//2, 
-                                        (60 * 8 + 20 + 100)//2+40,
-                                        text="Čierny vyhral šachmatom",
-                                        font=('Helvetica','15','bold'))
-            elif self.board.is_stalemate() == True:
+                    canvas.create_text((60*8+20)//2,
+                                       (60*8+20+100)//2 + 40,
+                                       text="Čierny vyhral šachmatom",
+                                       font=('Helvetica', '15', 'bold'))
+            elif self.board.is_stalemate():
                 white_timer.stop_timer()
                 black_timer.stop_timer()
                 canvas.create_rectangle(60, 60+60*3, 15+60*7, 60*6,
                                         fill="grey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                    (60 * 8 + 20 + 100)//2,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
-                canvas.create_text((60 * 8 + 20)//2, 
-                                    (60 * 8 + 20 + 100)//2+40,
-                                    text="Patová situácia",
-                                    font=('Helvetica','15','bold'))
-            elif self.board.is_insufficient_material() == True:
+                canvas.create_text((60*8+20)//2 - 5,
+                                   (60*8+20 + 100)//2,
+                                   text="REMÍZA",
+                                   font=('Helvetica', '50', 'bold'))
+                canvas.create_text((60*8+20)//2,
+                                   (60*8+20+100)//2 + 40,
+                                   text="Patová situácia",
+                                   font=('Helvetica', '15', 'bold'))
+            elif self.board.is_insufficient_material():
                 white_timer.stop_timer()
                 black_timer.stop_timer()
                 canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                         fill="lightgrey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                    (60 * 8 + 20 + 100)//2,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
-                canvas.create_text((60 * 8 + 20)//2, 
-                                    (60 * 8 + 20 + 100)//2+40,
-                                    text="Nedostatok materiálu",
-                                    font=('Helvetica','15','bold'))
-            elif self.board.can_claim_threefold_repetition() == True:
+                canvas.create_text((60*8+20)//2 - 5,
+                                   (60*8+20+100)//2,
+                                   text="REMÍZA",
+                                   font=('Helvetica', '50', 'bold'))
+                canvas.create_text((60*8+20)//2,
+                                   (60*8+20+100)//2 + 40,
+                                   text="Nedostatok materiálu",
+                                   font=('Helvetica', '15', 'bold'))
+            elif self.board.can_claim_threefold_repetition():
                 white_timer.stop_timer()
                 black_timer.stop_timer()
                 canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
                                         fill="lightgrey", outline="black")
-                canvas.create_text((60 * 8 + 20)//2, 
-                                    (60 * 8 + 20 + 100)//2-5,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
-                canvas.create_text((60 * 8 + 20)//2, 
-                                    (60 * 8 + 20 + 100)//2+40,
-                                    text="Opakovanie ťahou",
-                                    font=('Helvetica','15','bold'))
+                canvas.create_text((60*8+20)//2,
+                                   (60*8+20+100)//2 - 5,
+                                   text="REMÍZA",
+                                   font=('Helvetica', '50', 'bold'))
+                canvas.create_text((60*8+20)//2,
+                                   (60*8+20+100)//2 + 40,
+                                   text="Opakovanie ťahou",
+                                   font=('Helvetica', '15', 'bold'))
 
     def game_end(self):
         clean_canvas([self.bm, black_timer.time_label, white_timer.time_label])
         Menu()
+
 
 class Timer:
     def __init__(self, time, bonus, x, y):
@@ -446,7 +470,7 @@ class Timer:
         self.bonus = bonus
         self.formated_time = tk.StringVar()
         self.formated_time.set(self.format_time())
-        
+
         self.time_label = tk.Label(canvas, textvariable=self.formated_time,
                                    font=("Arial", 24))
         self.time_label.place(x=x, y=y)
@@ -467,32 +491,32 @@ class Timer:
             white_timer.stop_timer()
             black_timer.stop_timer()
             canvas.create_rectangle(5+60, 60+60*3, 15+60*7, 55+60*5,
-                                         fill="lightgrey", outline="black")
-            
+                                    fill="lightgrey", outline="black")
+
             if self.board.can_claim_draw():
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                   (60 * 8 + 20 + 100)//2,
-                                    text="REMÍZA",
-                                    font=('Helvetica','50','bold'))
-                canvas.create_text((60 * 8 + 20)//2, 
-                                   (60 * 8 + 20 + 100)//2+40,
-                                    text="Nedostatok času a nedostatok materiálu",
-                                    font=('Helvetica','15','bold'))
+                canvas.create_text((60*8+20)//2 - 5,
+                                   (60*8+20+100)//2,
+                                   text="REMÍZA",
+                                   font=('Helvetica', '50', 'bold'))
+                canvas.create_text((60*8+20)//2,
+                                   (60*8+20+100)//2 + 40,
+                                   text="Nedostatok času a nedostatok materiálu",
+                                   font=('Helvetica', '15', 'bold'))
             else:
-                canvas.create_text((60 * 8 + 20)//2-5, 
-                                   (60 * 8 + 20 + 100)//2,
-                                    text="VÝHRA",
-                                    font=('Helvetica','50','bold'))
+                canvas.create_text((60*8+20)//2 - 5,
+                                   (60*8+20+100)//2,
+                                   text="VÝHRA",
+                                   font=('Helvetica', '50', 'bold'))
                 if self.board.turn == chess.BLACK:
-                    canvas.create_text((60 * 8 + 20)//2, 
-                                       (60 * 8 + 20 + 100)//2+40,
-                                        text="biely vyhral - nedostatok času",
-                                        font=('Helvetica','15','bold'))
+                    canvas.create_text((60*8+20)//2,
+                                       (60*8+20+100)//2 + 40,
+                                       text="biely vyhral - nedostatok času",
+                                       font=('Helvetica', '15', 'bold'))
                 else:
-                    canvas.create_text((60 * 8 + 20)//2, 
-                                       (60 * 8 + 20 + 100)//2+40,
-                                        text="čierny vyhral - nedostatok času",
-                                        font=('Helvetica','15','bold'))
+                    canvas.create_text((60*8+20)//2,
+                                       (60*8+20+100)//2 + 40,
+                                       text="čierny vyhral - nedostatok času",
+                                       font=('Helvetica', '15', 'bold'))
 
     def stop_timer(self):
         if self.active_timer is not None:
@@ -501,7 +525,7 @@ class Timer:
             canvas.after_cancel(self.active_timer)
 
 
-class OpeningCreator:  
+class OpeningCreator:
     def __init__(self, file) -> None:
         self.variant = 0
         self.putback = 0
@@ -517,12 +541,12 @@ class OpeningCreator:
 
         # Chessboard rendering
         draw_board(chess.Board())
-        
-        # Scroll lists
-        self.moveList = Listbox(window, font=10)
-        self.moveList.place(x=w-200, y=40, height=190, width=157)
 
-        self.varList = Listbox(window, font=10)
+        # Scroll lists
+        self.move_list = Listbox(window, font=10)
+        self.move_list.place(x=w-200, y=40, height=190, width=157)
+
+        self.var_list = Listbox(window, font=10)
 
         # OpeningCreator buttons
         self.b1 = Button(canvas, text="Zápis", command=self.update_scroll_list,
@@ -530,7 +554,7 @@ class OpeningCreator:
         self.b1.place(x=w-200, y=18)
         self.b1.config(state=tk.DISABLED)
 
-        self.b2 = Button(canvas, text="Varianty", command=self.update_variant_list,
+        self.b2 = Button(canvas, text="Varianty", command=self.update_var_list,
                          height=1, width=6)
         self.b2.place(x=w-156, y=18)
 
@@ -538,32 +562,38 @@ class OpeningCreator:
                        bg="lightgrey", width=17)
         self.e.place(x=w-200, y=243)
 
-        self.b3 = Button(canvas, text="Uložiť", command=self.save,
+        self.b3 = Button(canvas, text="Uložiť",
+                         command=self.save,
                          height=1, width=5)
         self.b3.place(x=w-88, y=239)
 
-        self.bm = Button(canvas, text="Menu", command=self.end,
+        self.bm = Button(canvas, text="Menu",
+                         command=self.end,
                          height=2, width=21)
         self.bm.place(x=w-200, y=260+10)
 
-        self.b4 = Button(canvas, text="Resetovať šachovnicu", command=self.reset,
+        self.b4 = Button(canvas, text="Resetovať šachovnicu",
+                         command=self.reset,
                          height=2, width=21)
         self.b4.place(x=w-200, y=315+10)
 
-        self.b5 = Button(canvas, text="Vymaž", command=self.delete,
+        self.b5 = Button(canvas, text="Vymaž",
+                         command=self.delete,
                          height=2, width=21)
         self.b5.place(x=w-200, y=370+10)
 
-        self.b6 = Button(canvas, text="<", command=self.back,
+        self.b6 = Button(canvas, text="<",
+                         command=self.back,
                          height=2, width=7)
         self.b6.place(x=w-200, y=425+10)
         self.b6.config(state=tk.DISABLED)
 
-        self.b7 = Button(canvas, text=">", command=self.next,
+        self.b7 = Button(canvas, text=">",
+                         command=self.next,
                          height=2, width=7)
         self.b7.place(x=w-102, y=425+10)
         self.b7.config(state=tk.DISABLED)
-        
+
         # Action
         canvas.bind("<Button-1>", self.on_click)
 
@@ -582,10 +612,10 @@ class OpeningCreator:
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     self.b6.config(state=tk.NORMAL)
-                    
+
                     # Noting move
                     self.notation.append(self.position)
-                    
+
                     # Chessboard/move rendering
                     self.board.push_san(self.position)
                     draw_board(self.board)
@@ -594,22 +624,22 @@ class OpeningCreator:
             except:
                 pass
 
-    def open_varList(self, action):
-        # Get the index of the item you clicked on
-        index = self.varList.nearest(action.y)
-        # Get the text of the item you clicked on
-        selected_item = self.varList.get(index)
+    def open_var_list(self, action):
+        # Getting the index of the item you clicked on
+        index = self.var_list.nearest(action.y)
+        # Getting the text of the item you clicked on
+        selected_item = self.var_list.get(index)
 
         with open(self.file, "r") as f:
             lines = f.readlines()
-        
-        for i in range(len(lines)):
-            if selected_item == lines[i][:lines[i].index("##")]:
-                self.notation = lines[i][lines[i].index("##")+2:].split()
+
+        for line in lines:
+            if selected_item == line[:line.index("##")]:
+                self.notation = line[line.index("##")+2:].split()
 
                 self.board = chess.Board()
-                for i in range(len(self.notation)):
-                    self.board.push_san(self.notation[i])
+                for chess_line in self.notation:
+                    self.board.push_san(chess_line)
 
                 draw_board(self.board)
 
@@ -617,15 +647,15 @@ class OpeningCreator:
         self.b6.config(state=tk.NORMAL)
         self.b7.config(state=tk.DISABLED)
 
-    def delete_varList(self, action):
+    def delete_var_list(self, action):
         # Get the index of the item you clicked on
-        index = self.varList.nearest(action.y)
+        index = self.var_list.nearest(action.y)
         # Get the text of the item you clicked on
-        selected_item = self.varList.get(index)
+        selected_item = self.var_list.get(index)
 
         with open(self.file, "r") as f:
             lines = f.readlines()
-        
+
         for i in range(len(lines)):
             if selected_item == lines[i][:lines[i].index("##")]:
                 lines.pop(i)
@@ -634,48 +664,53 @@ class OpeningCreator:
         with open(self.file, "w") as f:
             f.writelines(lines)
 
-        self.update_variant_list()
+        self.update_var_list()
 
     def update_scroll_list(self):
         self.b1.config(state=tk.DISABLED)
         self.b2.config(state=tk.NORMAL)
 
-        if self.moveList:
-            self.moveList.destroy()
+        if self.move_list:
+            self.move_list.destroy()
         else:
-            self.varList.destroy()
+            self.var_list.destroy()
 
-        self.moveList = Listbox(window, font=10, selectmode="browse")
+        self.move_list = Listbox(window, font=10, selectmode="browse")
 
         for i in range(0, len(self.notation), 2):
             if len(self.notation) != i+1:
-                self.moveList.insert(END, str(i-(i//2)+1) + ". " + str(self.notation[i]) + "     " + str(self.notation[i+1]))
+                self.move_list.insert(END,
+                                      str(i-(i//2)+1) + ". " +
+                                      str(self.notation[i]) + "     " +
+                                      str(self.notation[i+1]))
             else:
-                self.moveList.insert(END, str(i-(i//2)+1) + ". " + str(self.notation[i]))
-        
-        self.moveList.place(x=w-200, y=40, height=200, width=157)
-    
-    def update_variant_list(self):
+                self.move_list.insert(END,
+                                      str(i-(i//2)+1) + ". " +
+                                      str(self.notation[i]))
+
+        self.move_list.place(x=w-200, y=40, height=200, width=157)
+
+    def update_var_list(self):
         self.b1.config(state=tk.NORMAL)
         self.b2.config(state=tk.DISABLED)
 
-        if self.varList:
-            self.varList.destroy()
+        if self.var_list:
+            self.var_list.destroy()
         else:
-            self.moveList.destroy()
-        
-        self.varList = Listbox(window, font=10)
+            self.move_list.destroy()
+
+        self.var_list = Listbox(window, font=10)
 
         with open(self.file, "r") as f:
             lines = f.readlines()
-        
-        for i in range(len(lines)):
-            self.varList.insert(END, lines[i][:lines[i].index("##")])
 
-        self.varList.place(x=w-200, y=40, height=200, width=157)
+        for line in lines:
+            self.var_list.insert(END, line[:line.index("##")])
 
-        self.varList.bind('<Button-1>', self.open_varList)
-        self.varList.bind('<Button-3>', self.delete_varList)
+        self.var_list.place(x=w-200, y=40, height=200, width=157)
+
+        self.var_list.bind('<Button-1>', self.open_var_list)
+        self.var_list.bind('<Button-3>', self.delete_var_list)
 
     def read_specific_line(self, filename, line_number):
         with open(filename, 'r') as f:
@@ -687,7 +722,7 @@ class OpeningCreator:
 
     def save(self):
         name = self.name_variant.get()
-        
+
         if name != "":
             # formating from Listu to str
             note = ""
@@ -702,7 +737,7 @@ class OpeningCreator:
             with open(self.file, "w") as f:
                 f.writelines(lines)
 
-            self.update_variant_list()
+            self.update_var_list()
 
             # Will return the entry to its original state
             self.e.delete(0, tk.END)
@@ -749,10 +784,11 @@ class OpeningCreator:
                 self.b7.config(state=tk.DISABLED)
 
     def end(self):
-        clean_canvas([self.bm, self.b1, self.b2, self.b3, self.b4, self.b5, 
-                      self.b5, self.b6, self.b7, self.moveList, self.varList,
+        clean_canvas([self.bm, self.b1, self.b2, self.b3, self.b4, self.b5,
+                      self.b5, self.b6, self.b7, self.move_list, self.var_list,
                       self.e])
         OpeningLearnerMenu()
+
 
 class OpeningLearner:
     def __init__(self, file) -> None:
@@ -777,21 +813,21 @@ class OpeningLearner:
         # Getting info about opening
         with open(self.file, "r") as f:
             self.lines = f.readlines()
-        
+
         self.names = []
         self.moves = []
-        for i in range(len(self.lines)):
-            self.names.append(self.lines[i][:self.lines[i].index("##")])
-            self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
+        for line in self.lines:
+            self.names.append(line[:line.index("##")])
+            self.moves.append(line[line.index("##")+2:-2].split())
 
         # Chessboard rendering
         draw_board(None, 10, 60)
 
         # Button START
         self.bs = Button(canvas, text="START", command=self.opening_start,
-               height=2, width=20)
+                         height=2, width=20)
         self.bs.place(x=w-160-15, y=h-50)
-        
+
         # Button MENU
         self.bm = Button(canvas, text="Menu", command=self.end,
                          height=2, width=20)
@@ -816,25 +852,26 @@ class OpeningLearner:
 
         # Determining coordinates
         canvas.bind("<Button-1>", self.on_click)
-    
+
     def title(self):
         canvas.create_text(w//2, 35, text=self.names[self.variant],
-                           font=('Helvetica','30','bold'))
-    
-    def on_click(self, action): 
+                           font=('Helvetica', '30', 'bold'))
+
+    def on_click(self, action):
         x = action.x
         y = action.y
         if 10 < x < 60*8 + 10 and 50 < y < 60*8+50:
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 50) // 60)
-            
+
             self.position += file + rank
             self.position = self.position[2:]
-            
+
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     # Correct move
-                    if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
+                    if len(self.moves[self.variant]) > self.turn and \
+                       self.position == self.moves[self.variant][self.turn]:
                         self.board.push_san(self.position)
                         draw_board(self.board, 10, 60)
                         self.title()
@@ -852,13 +889,15 @@ class OpeningLearner:
                 pass
 
     def correct(self):
-        self.l1 = Label(canvas, text="Správne", font=('Helvetica','23','bold'), 
+        self.l1 = Label(canvas, text="Správne",
+                        font=('Helvetica', '23', 'bold'),
                         bg="lightgreen")
         self.l1.place(x=60*3+10, y=h-50)
         self.l1.after(500, self.l1.destroy)
 
     def wrong(self):
-        self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','18','bold'), 
+        self.l2 = Label(canvas, text="Nesprávne",
+                        font=('Helvetica', '18', 'bold'),
                         bg="firebrick2")
         self.l2.place(x=60*3+10, y=h-47)
         self.l2.after(500, self.l2.destroy)
@@ -871,7 +910,7 @@ class OpeningLearner:
             self.next_move()
         else:
             self.end()
-    
+
     def next_move(self):
         # try - due to multiple presses of self.bn
         try:
@@ -893,6 +932,7 @@ class OpeningLearner:
         else:
             clean_canvas([self.bm, self.bh])
         OpeningLearnerMenu()
+
 
 class OpeningReviewer:
     def __init__(self, file) -> None:
@@ -921,21 +961,21 @@ class OpeningReviewer:
         # Getting info about opening
         with open(self.file, "r") as f:
             self.lines = f.readlines()
-        
+
         self.names = []
         self.moves = []
-        for i in range(len(self.lines)):
-            self.names.append(self.lines[i][:self.lines[i].index("##")])
-            self.moves.append(self.lines[i][self.lines[i].index("##")+2:-2].split())
+        for line in self.lines:
+            self.names.append(line[:line.index("##")])
+            self.moves.append(line[line.index("##")+2:-2].split())
 
         # Chessboard rendering
         draw_board(None, 10, 60)
 
         # Button START
         self.bs = Button(canvas, text="START", command=self.opening_start,
-               height=2, width=20)
+                         height=2, width=20)
         self.bs.place(x=w-160-15, y=h-50)
-        
+
         # Button MENU
         self.bm = Button(canvas, text="Menu", command=self.end,
                          height=2, width=20)
@@ -959,22 +999,23 @@ class OpeningReviewer:
 
         # Determining coordinates
         canvas.bind("<Button-1>", self.on_click)
-    
-    def on_click(self, action): 
+
+    def on_click(self, action):
         x = action.x
         y = action.y
         if 10 < x < 60*8 + 10 and 50 < y < 60*8+50:
             file = chr(ord('a') + (x - 10) // 60)
             rank = str(8 - (y - 50) // 60)
-            
+
             self.position += file + rank
             self.position = self.position[2:]
-            
+
             try:
                 if chess.Move.from_uci(self.position) in self.board.legal_moves:
                     # Correct move
-                    if self.correcting_misstakes == False:
-                        if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
+                    if not self.correcting_misstakes:
+                        if len(self.moves[self.variant]) > self.turn and \
+                               self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
                             draw_board(self.board, 10, 60)
                             self.title()
@@ -983,8 +1024,9 @@ class OpeningReviewer:
                         else:
                             self.wrong()
 
-                    elif self.correcting_misstakes:
-                        if len(self.moves[self.variant]) > self.turn and self.position == self.moves[self.variant][self.turn]:
+                    else:
+                        if len(self.moves[self.variant]) > self.turn and \
+                           self.position == self.moves[self.variant][self.turn]:
                             self.board.push_san(self.position)
                             draw_board(self.board, 10, 60)
                             self.title()
@@ -1001,10 +1043,10 @@ class OpeningReviewer:
                             canvas.after(500, self.handle_wrong_move)
             except:
                 pass
-    
+
     def title(self):
         canvas.create_text(w//2, 35, text=self.names[self.variant],
-                           font=('Helvetica','30','bold'))
+                           font=('Helvetica', '30', 'bold'))
 
     def handle_correct_move(self):
         self.fixed[self.actual_misstake] += 1
@@ -1020,7 +1062,7 @@ class OpeningReviewer:
 
                 self.turn = 0
                 self.variant += 1
-                self.title()  
+                self.title()
 
             elif len(self.moves)-1 == self.variant:
                 self.end()
@@ -1046,28 +1088,33 @@ class OpeningReviewer:
         self.turn = n
         for i in range(n):
             self.board.push_san(self.moves[self.variant][i])
-            
+
         draw_board(self.board, 10, 60)
         self.title()
-        
+
     def next(self):
         # self.correcting_misstakes == True
-        if self.misstakes != [] and self.turn == len(self.moves[self.variant]) and self.correcting_misstakes == False:
+        if self.misstakes != [] and \
+           self.turn == len(self.moves[self.variant]) and \
+           not self.correcting_misstakes:
             self.correcting_misstakes = True
             self.fixed = [0] * len(self.misstakes)
             self.load_board(self.misstakes[0])
             self.correct()
 
-        elif self.correcting_misstakes and self.turn == len(self.moves[self.variant]):
+        elif self.correcting_misstakes and \
+                self.turn == len(self.moves[self.variant]):
             self.handle_correct_move()
             self.correct()
-        
-        elif self.correcting_misstakes and self.turn != len(self.moves[self.variant]):
+
+        elif self.correcting_misstakes and \
+                self.turn != len(self.moves[self.variant]):
             self.handle_wrong_move()
             self.wrong()
 
         # self.correcting_misstakes == False
-        elif len(self.moves)-1 == self.variant and self.turn == len(self.moves[self.variant]):
+        elif len(self.moves)-1 == self.variant and \
+                self.turn == len(self.moves[self.variant]):
             self.end()
 
         elif self.turn == len(self.moves[self.variant]):
@@ -1083,13 +1130,15 @@ class OpeningReviewer:
             self.wrong()
 
     def correct(self):
-        self.l1 = Label(canvas, text="Správne", font=('Helvetica','23','bold'), 
+        self.l1 = Label(canvas, text="Správne",
+                        font=('Helvetica', '23', 'bold'),
                         bg="lightgreen")
         self.l1.place(x=60*3+10, y=h-50)
         self.l1.after(500, self.l1.destroy)
 
     def wrong(self):
-        self.l2 = Label(canvas, text="Nesprávne", font=('Helvetica','18','bold'), 
+        self.l2 = Label(canvas, text="Nesprávne",
+                        font=('Helvetica', '18', 'bold'),
                         bg="firebrick2")
         self.l2.place(x=60*3+10, y=h-47)
         if self.turn not in self.misstakes:
