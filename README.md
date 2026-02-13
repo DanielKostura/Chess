@@ -1,78 +1,37 @@
-# How to install chess module?
-For Windows: 
-   pip install chess
-For Mac or Linux:
-   python -m pip install chess
+# ♟️ Python Chess App
 
-# File structure
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12+-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/GUI-Tkinter-green.svg?style=for-the-badge" alt="Tkinter">
+  <img src="https://img.shields.io/badge/Type--Checking-Mypy-informational.svg?style=for-the-badge" alt="Mypy">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License">
+</p>
+
+---
+
+## 📖 Overview
+
+This is a comprehensive chess application developed in **Python**, focusing on clean architecture and modular design. The application provides a full gameplay experience alongside specialized tools for opening analysis and game-time management.
+
+### ✨ Key Features
+* **Modular Architecture:** Strict separation between game logic, graphical interface, and utility modules.
+* **Chess Openings Module:** A dedicated system for exploring and studying chess opening theory.
+* **Integrated Timer:** Precise dual-clock tracking for competitive match styles (Blitz/Rapid).
+* **Move Validation:** Robust implementation of chess rules and legal move calculations.
+* **Type Safety:** The codebase is fully annotated with Python Type Hinting for better maintainability.
+
+---
+
+## 📂 Project Structure
+
+
+
+```bash
 chess_app/
-│
-├── main.py                            # start app
-├── gui/
-│   ├── game/                          # GUI for games
-│   │   ├── ai_game.py
-│   │   ├── pvp_game.py
-│   │   ├── start_pvp_game.py
-│   │
-│   ├── menus/                         # GUI for menus
-│   │   ├── ai_menu.py
-│   │   ├── game_menu.py
-│   │   ├── menu.py
-│   │   ├── opening_menu.py
-│   │
-│   ├── opening_gui/
-│   │   ├── opening_creator.py
-│   │   ├── opening_learner.py
-│   │   ├── opening_reviewer.py
-│   │
-│   ├── timer/
-│   │   ├── timer_controller.py
-│   │   ├── time_view.py
-│   │
-│   ├── base_screen.py                 # handle lifecycle of witgets
-│   ├── board_view.py                  # handle
-│   ├── game_controller.py
-│   ├── screen_manager.py
-│   ├── visual_efects.py
-│   
-├── logic/
-│   ├── opening_logic/                 # handle opening logic
-│   │   ├── creator_manager.py
-│   │   ├── learner_manager.py
-│   │   ├── reviewer_manager.py
-│   │   ├── opening_manager.py
-│   │
-│   ├── ai_manager.py                  # 
-│   ├── chess_rules.py
-│   ├── file_operations.py
-│   ├── match_manager.py
-│   ├── timer.py
-│   
-├── openings/
-│   ├── {user`s_opening_name}.txt
-│   
-├── ui_component/
-│   ├── listbox_manager.py
-│   ├── notation_panel.py
-│   ├── variant_panel.py
-│
-├── utils/
-│   ├── chess_utils.py
-
-
-chess_app/
-│
-├── main.py                # start app
-├── gui/
-│   ├── canvas.py          # draw_board, clean_canvas
-│   ├── menu.py            # Menu, GameMenu, BotMenu
-│   ├── game_gui.py        # GUI for Game
-│   ├── opening_gui.py     # OpeningCreator, Learner, Reviewer
-│
-├── logic/
-│   ├── game.py            # class Game (without Tkinter)
-│   ├── timer.py           # Timer
-│   ├── openings.py        # work with fikes .txt
-│
-├── utils/
-│   └── chess_utils.py     # create_chess_array
+├── main.py             # Main entry point of the application
+├── logic/              # Core rules, piece movement, and move validation
+├── gui/                # UI definitions and graphical components
+├── game/               # Game state management and main loop
+├── openings/           # Database and UI for chess openings
+├── timer/              # Game clock logic and countdowns
+└── utils/              # Helper functions, constants, and shared utilities
