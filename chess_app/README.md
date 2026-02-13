@@ -8,29 +8,31 @@
 
 ---
 
-## 📖 O projekte
+## 📖 Overview
 
-Komplexná šachová aplikácia vyvinutá v jazyku Python so zameraním na čistú architektúru a modulárnosť. Aplikácia poskytuje nielen hru samotnú, ale aj nástroje pre analýzu otvorení a správu herného času.
+This is a comprehensive chess application developed in **Python**, focusing on clean architecture and modular design. The application provides a full gameplay experience alongside specialized tools for opening analysis and game-time management.
 
-### ✨ Kľúčové vlastnosti
-* **Modularita:** Oddelená logika hry, grafické rozhranie a pomocné moduly.
-* **Chess Openings:** Špecializovaný modul pre prácu so šachovými otvoreniami.
-* **Integrovaný časovač:** Presné sledovanie času pre oboch hráčov.
-* **E-mail Modul:** Pripravená infraštruktúra pre zdieľanie výsledkov.
-* **Type Safety:** Kód využíva Python Type Hinting pre vyššiu stabilitu.
+### ✨ Key Features
+* **Modular Architecture:** Strict separation between game logic, graphical interface, and utility modules.
+* **Chess Openings Module:** A dedicated system for exploring and studying chess opening theory.
+* **Integrated Timer:** Precise dual-clock tracking for competitive match styles (Blitz/Rapid).
+* **Email Integration:** Built-in infrastructure to share game results or records via email.
+* **Type Safety:** The codebase is fully annotated with Python Type Hinting and verified via `mypy`.
 
 ---
 
-## 📂 Štruktúra projektu
+## 📂 Project Structure
+
+
 
 ```bash
 chess_app/
-├── main.py             # Hlavný vstupný bod aplikácie
-├── logic/              # Pravidlá hry, pohyb figúrok a validácia
-├── gui/                # Definícia okien a grafických komponentov
-├── game/               # Správa herného stavu a cyklu
-├── openings/           # Databáza a UI pre šachové otvorenia
-├── timer/              # Logika herných hodín
-├── email/              # Modul pre e-mailovú komunikáciu
-├── resources/          # Obrázky figúrok, zvuky a ikony
-└── utils/              # Pomocné funkcie a konštanty
+├── main.py             # Main entry point of the application
+├── logic/              # Core rules, piece movement, and move validation
+├── gui/                # UI definitions and graphical components
+├── game/               # Game state management and main loop
+├── openings/           # Database and UI for chess openings
+├── timer/              # Game clock logic and countdowns
+├── email/              # Module for email communication and notifications
+├── resources/          # Assets: piece images, sounds, and icons
+└── utils/              # Helper functions, constants, and shared utilities
