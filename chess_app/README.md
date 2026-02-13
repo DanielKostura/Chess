@@ -4,6 +4,7 @@
   <img src="https://img.shields.io/badge/Python-3.12+-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/GUI-Tkinter-green.svg?style=for-the-badge" alt="Tkinter">
   <img src="https://img.shields.io/badge/Type--Checking-Mypy-informational.svg?style=for-the-badge" alt="Mypy">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License">
 </p>
 
 ---
@@ -16,8 +17,8 @@ This is a comprehensive chess application developed in **Python**, focusing on c
 * **Modular Architecture:** Strict separation between game logic, graphical interface, and utility modules.
 * **Chess Openings Module:** A dedicated system for exploring and studying chess opening theory.
 * **Integrated Timer:** Precise dual-clock tracking for competitive match styles (Blitz/Rapid).
-* **Email Integration:** Built-in infrastructure to share game results or records via email.
-* **Type Safety:** The codebase is fully annotated with Python Type Hinting and verified via `mypy`.
+* **Move Validation:** Robust implementation of chess rules and legal move calculations.
+* **Type Safety:** The codebase is fully annotated with Python Type Hinting for better maintainability.
 
 ---
 
@@ -33,6 +34,4 @@ chess_app/
 ├── game/               # Game state management and main loop
 ├── openings/           # Database and UI for chess openings
 ├── timer/              # Game clock logic and countdowns
-├── email/              # Module for email communication and notifications
-├── resources/          # Assets: piece images, sounds, and icons
 └── utils/              # Helper functions, constants, and shared utilities
