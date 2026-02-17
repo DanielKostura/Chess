@@ -109,16 +109,16 @@ class AiManager(GameController):
             if move.uci() == "e1g1" or move.uci() == "e1c1" or \
                move.uci() == "e8g8" or move.uci() == "e8c8":
                 if board.color_at(move.to_square) == WHITE:
-                    return 150
+                    return 50
                 else:
-                    return -150
+                    return -50
 
         # Biely
         if board.has_castling_rights(WHITE):
-            bonus += 50
+            bonus += 25
         # Čierny
         if board.has_castling_rights(BLACK):
-            bonus -= 50
+            bonus -= 25
         return bonus
 
     def _evaluate_board(self, board: Board) -> float:
@@ -137,7 +137,7 @@ class AiManager(GameController):
 
         # King safety
         if board.is_check():
-            score += -20 if board.turn == WHITE else 20
+            score += -10 if board.turn == WHITE else 10
         
         score += self._evaluate_castling(board)
 
@@ -180,8 +180,8 @@ class AiManager(GameController):
                 break
 
         assert best_move is not None, "AI could not find a valid move"
-        self.notation.append(best_move.uci())
         self.board.push(best_move)
+        self.notation.append(best_move.uci())
     
         self.draw_board(self.board)
         self.check_game_state()
@@ -197,6 +197,8 @@ class AiManager(GameController):
 
             # wait a bit because board needs to render first
             self.canvas.after(10, self._make_ai_move)
+            # waiting for AI move to render before updating notation
+            self.canvas.after(10, lambda: self.listbox.update(self.notation))
             return True
         return False
 
