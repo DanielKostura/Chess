@@ -22,3 +22,5 @@ class NotationPanel(ListboxManager):
             
             items.append(line)
         self.fill_listbox(items)
+        
+        self.listbox.see("end")
