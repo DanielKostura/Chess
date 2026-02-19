@@ -52,8 +52,6 @@ class AiManager(GameController):
         self.color: Color = \
             color if color is not None else (WHITE if bool(getrandbits(1)) else BLACK)
         self.ai_color: Color = BLACK if self.color == WHITE else WHITE
-        if self.color == BLACK:
-            self._make_ai_move()
 
         BOARD_SIZE = 60 * 8
         self.center_x = (BOARD_SIZE + self.offset_x) // 2
@@ -61,6 +59,9 @@ class AiManager(GameController):
 
         self.listbox: Optional[NotationPanel] = None
         self.notation: list[str] = []
+
+        if self.color == BLACK:
+            self.canvas.after(10, self._make_ai_move)
 
     def _is_draw(self, board: Board) -> bool:
         return board.is_stalemate() or \
@@ -106,6 +107,7 @@ class AiManager(GameController):
         bonus = 0
 
         for move in reversed(board.move_stack):
+            # catle moves - e1g1, e1c1, e8g8, e8c8
             if move.uci() == "e1g1" or move.uci() == "e1c1" or \
                move.uci() == "e8g8" or move.uci() == "e8c8":
                 if board.color_at(move.to_square) == WHITE:
@@ -137,7 +139,7 @@ class AiManager(GameController):
 
         # King safety
         if board.is_check():
-            score += -10 if board.turn == WHITE else 10
+            score += -5 if board.turn == WHITE else 5
         
         score += self._evaluate_castling(board)
 
